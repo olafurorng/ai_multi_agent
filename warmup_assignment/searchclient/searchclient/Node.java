@@ -11,8 +11,21 @@ import searchclient.Command.Type;
 public class Node {
 	private static final Random RND = new Random(1);
 
-	public static int MAX_ROW = 70;
-	public static int MAX_COL = 70;
+	/**
+	 * This method should be called once, in the beginning when we have loaded
+	 * in the level and we know the number of columns and rows of the level
+	 */
+	public static void setLevelSize(final int numberOfRows, final int numberOfCol) {
+		MAX_ROW = numberOfRows;
+		MAX_COL = numberOfCol;
+
+		// initilaizing static walls and goals with the level size
+		walls = new boolean[MAX_ROW][MAX_COL];
+		goals = new char[MAX_ROW][MAX_COL];
+	}
+
+	public static int MAX_ROW;
+	public static int MAX_COL;
 
 	public int agentRow;
 	public int agentCol;
@@ -27,9 +40,9 @@ public class Node {
 	// this.walls[row][col] is true if there's a wall at (row, col)
 	//
 
-	public boolean[][] walls = new boolean[MAX_ROW][MAX_COL];
+	public static boolean[][] walls;
 	public char[][] boxes = new char[MAX_ROW][MAX_COL];
-	public char[][] goals = new char[MAX_ROW][MAX_COL];
+	public static char[][] goals;
 
 	public Node parent;
 	public Command action;

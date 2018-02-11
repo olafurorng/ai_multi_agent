@@ -3,6 +3,7 @@ package searchclient;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
+import java.util.ArrayList;
 import java.util.LinkedList;
 
 import searchclient.Memory;
@@ -20,13 +21,39 @@ public class SearchClient {
 			System.exit(1);
 		}
 
+		/**
+		 * Lets read through the BufferReader ('serverMessages') and store it in
+		 * a variable so we can iterate through the lines twice to:
+		 *		1. Find the size of the level, width and height (columns and rows)
+		 *         to be able to set the size of the level in `searchclient.Node` (NEW CODE)
+		 *		2. Create the initial state Node (PREVIOUS EXISTING CODE)
+		 */
+		ArrayList<String> lines = new ArrayList<String>();
+		int numberOfCol = 0;
+		int numberOfRows = 0;
+
+		while (!line.equals("")) {
+			lines.add(line);
+
+			if (line.length() > numberOfCol) {
+				numberOfCol = line.length();
+			}
+			numberOfRows++;
+
+			line = serverMessages.readLine();
+		}
+
+		Node.setLevelSize(numberOfRows, numberOfCol);
+
+
+		// Creating the initial state Node (Previous existing code)
 		int row = 0;
 		boolean agentFound = false;
 		this.initialState = new Node(null);
 
-		while (!line.equals("")) {
-			for (int col = 0; col < line.length(); col++) {
-				char chr = line.charAt(col);
+		for (String serverMessageLine: lines) {
+			for (int col = 0; col < serverMessageLine.length(); col++) {
+				char chr = serverMessageLine.charAt(col);
 
 				if (chr == '+') { // Wall.
 					this.initialState.walls[row][col] = true;
@@ -49,7 +76,7 @@ public class SearchClient {
 					System.exit(1);
 				}
 			}
-			line = serverMessages.readLine();
+
 			row++;
 		}
 	}
