@@ -1,16 +1,61 @@
 package searchclient;
 
 import java.util.Comparator;
+import java.util.ArrayList;
+import java.util.List;
+
 
 import searchclient.NotImplementedException;
 
 public abstract class Heuristic implements Comparator<Node> {
+
+	List<Integer> goalCol = new ArrayList<Integer>();
+	List<Integer> goalRow = new ArrayList<Integer>();
+	List<Boolean> goalsFinished = new ArrayList<Boolean>();
+
 	public Heuristic(Node initialState) {
 		// Here's a chance to pre-process the static parts of the level.
+
+		for (int row = 1; row < Node.MAX_ROW - 1; row++) {
+			for (int col = 1; col < Node.MAX_COL - 1; col++) {
+				if (Node.goals[row][col]  == 'a') {
+					goalCol.add(col);
+					goalRow.add(row);
+					goalsFinished.add(false);
+				}
+			}
+		}
 	}
 
 	public int h(Node n) {
-		throw new NotImplementedException();
+		// first check wich goals are finished
+		for (int i = 0; i < goalsFinished.size(); i++) {
+			int col = goalCol.get(i);
+			int row = goalRow.get(i);
+
+			if (n.boxes[row][col] == 'A') {
+				goalsFinished.set(i, true);
+			} else {
+				goalsFinished.set(i, false);
+			}
+		}
+
+		// iterate over the goals which are unfinished and find the shortest goal
+		// and calculate the lenght (the heurastic function) to the goal
+		int minLength = Integer.MAX_VALUE;
+		for (int i = 0; i < goalsFinished.size(); i++) {
+			if (!goalsFinished.get(i)) {
+				int width = Math.abs(n.agentCol - goalCol.get(i));
+				int height = Math.abs(n.agentRow - goalRow.get(i));
+
+				int length = width + height;
+				if (length < minLength) {
+					minLength = length;
+				}
+			}
+		}
+
+		return minLength;
 	}
 
 	public abstract int f(Node n);
