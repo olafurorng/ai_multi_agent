@@ -11,6 +11,8 @@ public abstract class Heuristic implements Comparator<Node> {
 
 	List<Integer> goalCol = new ArrayList<Integer>();
 	List<Integer> goalRow = new ArrayList<Integer>();
+	List<Character> goalChar = new ArrayList<Character>();
+
 	List<Boolean> goalsFinished = new ArrayList<Boolean>();
 
 	public Heuristic(Node initialState) {
@@ -18,9 +20,10 @@ public abstract class Heuristic implements Comparator<Node> {
 
 		for (int row = 1; row < Node.MAX_ROW - 1; row++) {
 			for (int col = 1; col < Node.MAX_COL - 1; col++) {
-				if (Node.goals[row][col]  == 'a') {
+				if (Node.goals[row][col] > 0) {
 					goalCol.add(col);
 					goalRow.add(row);
+					goalChar.add(Node.goals[row][col]);
 					goalsFinished.add(false);
 				}
 			}
@@ -33,7 +36,7 @@ public abstract class Heuristic implements Comparator<Node> {
 			int col = goalCol.get(i);
 			int row = goalRow.get(i);
 
-			if (n.boxes[row][col] == 'A') {
+			if (n.boxes[row][col] > 0 && n.boxes[row][col] == goalChar.get(i)) {
 				goalsFinished.set(i, true);
 			} else {
 				goalsFinished.set(i, false);
