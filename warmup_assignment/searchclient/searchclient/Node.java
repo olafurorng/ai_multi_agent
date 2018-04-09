@@ -6,6 +6,7 @@ import java.util.Collections;
 import java.util.LinkedList;
 import java.util.Random;
 
+import searchclient.ColorHelper.*;
 import searchclient.Command.Type;
 
 public class Node {
@@ -29,6 +30,7 @@ public class Node {
 
 	public int agentRow;
 	public int agentCol;
+	public static Color agentColor; // NOTE: nullable for SA levels
 
 	// Arrays are indexed from the top-left of the level, with first index being row and second being column.
 	// Row 0: (0,0) (0,1) (0,2) (0,3) ...

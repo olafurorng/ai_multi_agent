@@ -3,12 +3,12 @@ package searchclient;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
-import java.util.ArrayList;
-import java.util.LinkedList;
+import java.util.*;
 
 import searchclient.Memory;
 import searchclient.Strategy.*;
 import searchclient.Heuristic.*;
+import searchclient.ColorHelper.*;
 
 public class SearchClient {
 	public Node initialState;
@@ -16,10 +16,19 @@ public class SearchClient {
 	public SearchClient(BufferedReader serverMessages) throws Exception {
 		// Read lines specifying colors
 		String line = serverMessages.readLine();
-		if (line.matches("^[a-z]+:\\s*[0-9A-Z](\\s*,\\s*[0-9A-Z])*\\s*$")) {
-			System.err.println("Error, client does not support colors.");
-			System.exit(1);
+        HashMap<Character, String> colorsMap = new HashMap<Character, String>();
+		while (line.matches("^[a-z]+:\\s*[0-9A-Z](\\s*,\\s*[0-9A-Z])*\\s*$")) {
+            String[] colorParts = line.split("\\:");
+            String color = colorParts[0];
+            String[] agentsAndBoxes = colorParts[1].trim().split("\\,");
+            for(String agentOrBox : agentsAndBoxes){
+                colorsMap.put(agentOrBox.charAt(0), color);
+            }
+
+            line = serverMessages.readLine();
 		}
+
+		System.err.println(colorsMap);
 
 		/**
 		 * Lets read through the BufferReader ('serverMessages') and store it in
@@ -60,11 +69,16 @@ public class SearchClient {
 				} else if ('0' <= chr && chr <= '9') { // Agent.
 					if (agentFound) {
 						System.err.println("Error, not a single agent level");
+						System.err.println("Also remember to pass in different agent colors when we implement this");
 						System.exit(1);
 					}
 					agentFound = true;
 					this.initialState.agentRow = row;
 					this.initialState.agentCol = col;
+					if (colorsMap.size() > 0) { // colors are defined in this level
+                        Color agentColor = ColorHelper.getColorFromString(colorsMap.get('0')); // FIXME: CHANGE THIS WHEN WE ADD MORE AGENTS
+                        Node.agentColor = agentColor;
+                    }
 				} else if ('A' <= chr && chr <= 'Z') { // Box.
 					this.initialState.boxes[row][col] = chr;
 				} else if ('a' <= chr && chr <= 'z') { // Goal.
