@@ -18,7 +18,7 @@ public class Node {
 	public static void setLevelSize(final int numberOfRows, final int numberOfCol) {
 		MAX_ROW = numberOfRows;
 		MAX_COL = numberOfCol;
-
+		//System.err.println("Hello, World");
 		// initilaizing static walls and goals with the level size
 		walls = new boolean[MAX_ROW][MAX_COL];
 		goals = new char[MAX_ROW][MAX_COL];
