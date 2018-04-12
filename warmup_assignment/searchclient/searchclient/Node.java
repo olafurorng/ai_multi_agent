@@ -73,19 +73,6 @@ public class Node {
 		return this.parent == null;
 	}
 
-	public void setMapBoxes() {
-
-		for (int row = 1; row < MAX_ROW - 1; row++) {
-			for (int col = 1; col < MAX_COL - 1; col++) {
-		
-				if (this.boxes[row][col] > 0) {
-					String boxString = row + "," + col;
-					boxMap.put(boxString, Character.toString(this.boxes[row][col]));
-				}
-			}
-		}
-	}
-
 	public boolean isGoalState() {
 		for (int row = 1; row < MAX_ROW - 1; row++) {
 			for (int col = 1; col < MAX_COL - 1; col++) {
@@ -132,8 +119,6 @@ public class Node {
 						n.action = c;
 						n.agentRow = newAgentRow;
 						n.agentCol = newAgentCol;
-						n.boxes[newBoxRow][newBoxCol] = this.boxes[newAgentRow][newAgentCol];
-						 n.boxes[newAgentRow][newAgentCol] = 0;
 
 						String boxC = n.boxMap.get(newAgentRow + "," + newAgentCol);
 						n.boxMap.remove(newAgentRow + "," + newAgentCol);
@@ -153,8 +138,6 @@ public class Node {
 						n.action = c;
 						n.agentRow = newAgentRow;
 						n.agentCol = newAgentCol;
-						 n.boxes[this.agentRow][this.agentCol] = this.boxes[boxRow][boxCol];
-						 n.boxes[boxRow][boxCol] = 0;
 
 						String boxC = n.boxMap.get(boxRow + "," + boxCol);
 						n.boxMap.remove(boxRow + "," + boxCol);
@@ -180,10 +163,6 @@ public class Node {
 	private Node ChildNode() {
 		Node copy = new Node(this);
 
-		for (int row = 0; row < MAX_ROW; row++) {
-			System.arraycopy(this.boxes[row], 0, copy.boxes[row], 0, MAX_COL);
-		}
-
 		copy.boxMap = new HashMap<String,String>(this.boxMap);
 
 		return copy;
@@ -206,7 +185,7 @@ public class Node {
 			int result = 1;
 			result = prime * result + this.agentCol;
 			result = prime * result + this.agentRow;
-			result = prime * result + Arrays.deepHashCode(this.boxes);
+			result = prime * result + (boxMap != null ? boxMap.hashCode() : 0);
 			result = prime * result + Arrays.deepHashCode(this.goals);
 			result = prime * result + Arrays.deepHashCode(this.walls);
 			this._hash = result;
@@ -225,14 +204,14 @@ public class Node {
 		Node other = (Node) obj;
 		if (this.agentRow != other.agentRow || this.agentCol != other.agentCol)
 			return false;
-		if (!Arrays.deepEquals(this.boxes, other.boxes))
-			return false;
 		if (!Arrays.deepEquals(this.goals, other.goals))
 			return false;
 		if (!Arrays.deepEquals(this.walls, other.walls))
 			return false;
+		if (boxMap != null ? !boxMap.equals(other.boxMap) : other.boxMap != null) return false;
 		return true;
 	}
+
 
 	@Override
 	public String toString() {
@@ -242,9 +221,7 @@ public class Node {
 				break;
 			}
 			for (int col = 0; col < MAX_COL; col++) {
-				if (this.boxes[row][col] > 0) {
-					s.append(this.boxes[row][col]);
-				} else if (this.goals[row][col] > 0) {
+                if (this.goals[row][col] > 0) {
 					s.append(this.goals[row][col]);
 				} else if (this.walls[row][col]) {
 					s.append("+");
