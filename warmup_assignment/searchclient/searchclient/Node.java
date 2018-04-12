@@ -148,9 +148,7 @@ public class Node {
 	private Node ChildNode() {
 		Node copy = new Node(this);
 		for (int row = 0; row < MAX_ROW; row++) {
-			System.arraycopy(this.walls[row], 0, copy.walls[row], 0, MAX_COL);
 			System.arraycopy(this.boxes[row], 0, copy.boxes[row], 0, MAX_COL);
-			System.arraycopy(this.goals[row], 0, copy.goals[row], 0, MAX_COL);
 		}
 		return copy;
 	}
