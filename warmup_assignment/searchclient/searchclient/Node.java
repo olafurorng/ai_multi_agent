@@ -141,8 +141,16 @@ public class Node {
 		return expandedNodes;
 	}
 
-	private boolean cellIsFree(int row, int col) {
+    public boolean cellIsFree(int row, int col) {
 		return !walls[row][col] && this.boxes[row][col] == 0;
+	}
+
+    public boolean cellIsFreeAndNoGoalOrAgent(int row, int col) {
+        return !this.walls[row][col] && this.boxes[row][col] == 0 && !(agentRow == row && agentCol == col) && goals[row][col] == 0;
+    }
+
+	public boolean cellIsFreeOfGoalBoxAndAgent(int row, int col) {
+		return !(agentRow == row && agentCol == col) && this.boxes[row][col] == 0 && goals[row][col] == 0;
 	}
 
 	private boolean boxAt(int row, int col) {
