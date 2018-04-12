@@ -46,7 +46,7 @@ public class Node {
 	//
 
 	public static boolean[][] walls;
-	public Map<String, Character> boxMap = new HashMap<String, Character>();
+	public HashMap<String, Character> boxMap = new HashMap<String, Character>();
 	public static char[][] goals;
 
 	public Node parent;
@@ -170,6 +170,7 @@ public class Node {
 		Node copy = new Node(this);
 
 		copy.boxMap = new HashMap<String,Character>(this.boxMap);
+		//copy.boxMap = (HashMap) this.boxMap.clone();
 
 		return copy;
 	}
