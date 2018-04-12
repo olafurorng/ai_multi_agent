@@ -5,6 +5,8 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.LinkedList;
 import java.util.Random;
+import java.util.HashMap;
+import java.util.Map;
 
 import searchclient.ColorHelper.*;
 import searchclient.Command.Type;
@@ -44,6 +46,7 @@ public class Node {
 
 	public static boolean[][] walls;
 	public char[][] boxes = new char[MAX_ROW][MAX_COL];
+	public Map<String, String> boxMap = new HashMap<String, String>();
 	public static char[][] goals;
 
 	public Node parent;
@@ -70,11 +73,29 @@ public class Node {
 		return this.parent == null;
 	}
 
+	public void setMapBoxes() {
+
+		for (int row = 1; row < MAX_ROW - 1; row++) {
+			for (int col = 1; col < MAX_COL - 1; col++) {
+		
+				if (this.boxes[row][col] > 0) {
+					String boxString = row + "," + col;
+					boxMap.put(boxString, Character.toString(this.boxes[row][col]));
+				}
+			}
+		}
+	}
+
 	public boolean isGoalState() {
 		for (int row = 1; row < MAX_ROW - 1; row++) {
 			for (int col = 1; col < MAX_COL - 1; col++) {
-				char g = goals[row][col];
-				char b = Character.toLowerCase(boxes[row][col]);
+				char g = goals[row][col];						
+				char b = 0;
+
+				if (this.boxMap.get(row + "," + col) != null) {
+					b = Character.toLowerCase(this.boxMap.get(row + "," + col).charAt(0));
+				}
+
 				if (g > 0 && b != g) {
 					return false;
 				}
@@ -84,6 +105,7 @@ public class Node {
 	}
 
 	public ArrayList<Node> getExpandedNodes() {
+		
 		ArrayList<Node> expandedNodes = new ArrayList<Node>(Command.EVERY.length);
 		for (Command c : Command.EVERY) {
 			// Determine applicability of action
@@ -111,7 +133,12 @@ public class Node {
 						n.agentRow = newAgentRow;
 						n.agentCol = newAgentCol;
 						n.boxes[newBoxRow][newBoxCol] = this.boxes[newAgentRow][newAgentCol];
-						n.boxes[newAgentRow][newAgentCol] = 0;
+						 n.boxes[newAgentRow][newAgentCol] = 0;
+
+						String boxC = n.boxMap.get(newAgentRow + "," + newAgentCol);
+						n.boxMap.remove(newAgentRow + "," + newAgentCol);
+						n.boxMap.put(newBoxRow + "," + newBoxCol, boxC);
+
 						expandedNodes.add(n);
 					}
 				}
@@ -126,8 +153,13 @@ public class Node {
 						n.action = c;
 						n.agentRow = newAgentRow;
 						n.agentCol = newAgentCol;
-						n.boxes[this.agentRow][this.agentCol] = this.boxes[boxRow][boxCol];
-						n.boxes[boxRow][boxCol] = 0;
+						 n.boxes[this.agentRow][this.agentCol] = this.boxes[boxRow][boxCol];
+						 n.boxes[boxRow][boxCol] = 0;
+
+						String boxC = n.boxMap.get(boxRow + "," + boxCol);
+						n.boxMap.remove(boxRow + "," + boxCol);
+						n.boxMap.put(this.agentRow + "," + this.agentCol, boxC);
+
 						expandedNodes.add(n);
 					}
 				}
@@ -138,20 +170,22 @@ public class Node {
 	}
 
 	private boolean cellIsFree(int row, int col) {
-		return !this.walls[row][col] && this.boxes[row][col] == 0;
+		return !this.walls[row][col] && this.boxMap.get(row + "," + col) == null;
 	}
 
 	private boolean boxAt(int row, int col) {
-		return this.boxes[row][col] > 0;
+		return this.boxMap.get(row + "," + col) != null;
 	}
 
 	private Node ChildNode() {
 		Node copy = new Node(this);
+
 		for (int row = 0; row < MAX_ROW; row++) {
-			System.arraycopy(this.walls[row], 0, copy.walls[row], 0, MAX_COL);
 			System.arraycopy(this.boxes[row], 0, copy.boxes[row], 0, MAX_COL);
-			System.arraycopy(this.goals[row], 0, copy.goals[row], 0, MAX_COL);
 		}
+
+		copy.boxMap = new HashMap<String,String>(this.boxMap);
+
 		return copy;
 	}
 
