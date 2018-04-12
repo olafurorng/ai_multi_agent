@@ -110,8 +110,10 @@ public class Node {
 						n.action = c;
 						n.agentRow = newAgentRow;
 						n.agentCol = newAgentCol;
+						
 						n.boxes[newBoxRow][newBoxCol] = this.boxes[newAgentRow][newAgentCol];
 						n.boxes[newAgentRow][newAgentCol] = 0;
+
 						expandedNodes.add(n);
 					}
 				}
@@ -126,8 +128,10 @@ public class Node {
 						n.action = c;
 						n.agentRow = newAgentRow;
 						n.agentCol = newAgentCol;
+
 						n.boxes[this.agentRow][this.agentCol] = this.boxes[boxRow][boxCol];
 						n.boxes[boxRow][boxCol] = 0;
+
 						expandedNodes.add(n);
 					}
 				}
@@ -138,7 +142,7 @@ public class Node {
 	}
 
 	private boolean cellIsFree(int row, int col) {
-		return !this.walls[row][col] && this.boxes[row][col] == 0;
+		return !walls[row][col] && this.boxes[row][col] == 0;
 	}
 
 	private boolean boxAt(int row, int col) {
@@ -171,8 +175,8 @@ public class Node {
 			result = prime * result + this.agentCol;
 			result = prime * result + this.agentRow;
 			result = prime * result + Arrays.deepHashCode(this.boxes);
-			result = prime * result + Arrays.deepHashCode(this.goals);
-			result = prime * result + Arrays.deepHashCode(this.walls);
+			result = prime * result + Arrays.deepHashCode(goals);
+			result = prime * result + Arrays.deepHashCode(walls);
 			this._hash = result;
 		}
 		return this._hash;
@@ -191,10 +195,6 @@ public class Node {
 			return false;
 		if (!Arrays.deepEquals(this.boxes, other.boxes))
 			return false;
-		if (!Arrays.deepEquals(this.goals, other.goals))
-			return false;
-		if (!Arrays.deepEquals(this.walls, other.walls))
-			return false;
 		return true;
 	}
 
@@ -202,15 +202,15 @@ public class Node {
 	public String toString() {
 		StringBuilder s = new StringBuilder();
 		for (int row = 0; row < MAX_ROW; row++) {
-			if (!this.walls[row][0]) {
+			if (!walls[row][0]) {
 				break;
 			}
 			for (int col = 0; col < MAX_COL; col++) {
-				if (this.boxes[row][col] > 0) {
+				if (boxes[row][col] > 0) {
 					s.append(this.boxes[row][col]);
-				} else if (this.goals[row][col] > 0) {
-					s.append(this.goals[row][col]);
-				} else if (this.walls[row][col]) {
+				} else if (goals[row][col] > 0) {
+					s.append(goals[row][col]);
+				} else if (walls[row][col]) {
 					s.append("+");
 				} else if (row == this.agentRow && col == this.agentCol) {
 					s.append("0");
