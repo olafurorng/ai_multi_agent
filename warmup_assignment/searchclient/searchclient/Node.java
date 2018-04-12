@@ -1,10 +1,6 @@
 package searchclient;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.LinkedList;
-import java.util.Random;
+import java.util.*;
 
 import searchclient.ColorHelper.*;
 import searchclient.Command.Type;
@@ -43,7 +39,7 @@ public class Node {
 	//
 
 	public static boolean[][] walls;
-	public char[][] boxes = new char[MAX_ROW][MAX_COL];
+	public HashMap<Coordinates, Character> boxes = new HashMap<Coordinates, Character>();
 	public static char[][] goals;
 
 	public Node parent;
@@ -74,7 +70,7 @@ public class Node {
 		for (int row = 1; row < MAX_ROW - 1; row++) {
 			for (int col = 1; col < MAX_COL - 1; col++) {
 				char g = goals[row][col];
-				char b = Character.toLowerCase(boxes[row][col]);
+				char b = boxes.containsKey(new Coordinates(row, col)) ? Character.toLowerCase(boxes.get(new Coordinates(row, col))) : 0;
 				if (g > 0 && b != g) {
 					return false;
 				}
@@ -110,9 +106,9 @@ public class Node {
 						n.action = c;
 						n.agentRow = newAgentRow;
 						n.agentCol = newAgentCol;
-						
-						n.boxes[newBoxRow][newBoxCol] = this.boxes[newAgentRow][newAgentCol];
-						n.boxes[newAgentRow][newAgentCol] = 0;
+
+						n.boxes.put(new Coordinates(newBoxRow, newBoxCol), this.boxes.get(new Coordinates(newAgentRow, newAgentCol)));
+						n.boxes.remove(new Coordinates(newAgentRow, newAgentCol));
 
 						expandedNodes.add(n);
 					}
@@ -129,8 +125,8 @@ public class Node {
 						n.agentRow = newAgentRow;
 						n.agentCol = newAgentCol;
 
-						n.boxes[this.agentRow][this.agentCol] = this.boxes[boxRow][boxCol];
-						n.boxes[boxRow][boxCol] = 0;
+						n.boxes.put(new Coordinates(this.agentRow, this.agentCol), this.boxes.get(new Coordinates(boxRow, boxCol)));
+						n.boxes.remove(new Coordinates(boxRow, boxCol));
 
 						expandedNodes.add(n);
 					}
@@ -142,26 +138,27 @@ public class Node {
 	}
 
     public boolean cellIsFree(int row, int col) {
-		return !walls[row][col] && this.boxes[row][col] == 0;
+		return !walls[row][col] && this.boxes.containsKey(new Coordinates(row, col));
 	}
 
     public boolean cellIsFreeAndNoGoalOrAgent(int row, int col) {
-        return !this.walls[row][col] && this.boxes[row][col] == 0 && !(agentRow == row && agentCol == col) && goals[row][col] == 0;
+        return !this.walls[row][col] && this.boxes.containsKey(new Coordinates(row, col)) && !(agentRow == row && agentCol == col) && goals[row][col] == 0;
     }
 
 	public boolean cellIsFreeOfGoalBoxAndAgent(int row, int col) {
-		return !(agentRow == row && agentCol == col) && this.boxes[row][col] == 0 && goals[row][col] == 0;
+		return !(agentRow == row && agentCol == col) && this.boxes.containsKey(new Coordinates(row, col)) && goals[row][col] == 0;
 	}
 
 	private boolean boxAt(int row, int col) {
-		return this.boxes[row][col] > 0;
+		return this.boxes.containsKey(new Coordinates(row, col));
 	}
 
 	private Node ChildNode() {
 		Node copy = new Node(this);
-		for (int row = 0; row < MAX_ROW; row++) {
-			System.arraycopy(this.boxes[row], 0, copy.boxes[row], 0, MAX_COL);
-		}
+		//for (int row = 0; row < MAX_ROW; row++) {
+		//	System.arraycopy(this.boxes[row], 0, copy.boxes[row], 0, MAX_COL);
+		//}
+		copy.boxes = new HashMap<Coordinates, Character>(this.boxes); // TODO: oliskoli: maybe need more deep copy?
 		return copy;
 	}
 
@@ -175,6 +172,7 @@ public class Node {
 		return plan;
 	}
 
+
 	@Override
 	public int hashCode() {
 		if (this._hash == 0) {
@@ -182,7 +180,7 @@ public class Node {
 			int result = 1;
 			result = prime * result + this.agentCol;
 			result = prime * result + this.agentRow;
-			result = prime * result + Arrays.deepHashCode(this.boxes);
+			result = prime * result + (boxes != null ? boxes.hashCode() : 0);
 			result = prime * result + Arrays.deepHashCode(goals);
 			result = prime * result + Arrays.deepHashCode(walls);
 			this._hash = result;
@@ -201,10 +199,12 @@ public class Node {
 		Node other = (Node) obj;
 		if (this.agentRow != other.agentRow || this.agentCol != other.agentCol)
 			return false;
-		if (!Arrays.deepEquals(this.boxes, other.boxes))
-			return false;
+		if (boxes != null ? !boxes.equals(other.boxes) : other.boxes != null) return false;
 		return true;
 	}
+
+
+
 
 	@Override
 	public String toString() {
@@ -214,8 +214,8 @@ public class Node {
 				break;
 			}
 			for (int col = 0; col < MAX_COL; col++) {
-				if (boxes[row][col] > 0) {
-					s.append(this.boxes[row][col]);
+				if (boxes.containsKey(new Coordinates(row, col))) {
+					s.append(this.boxes.get(new Coordinates(row, col)));
 				} else if (goals[row][col] > 0) {
 					s.append(goals[row][col]);
 				} else if (walls[row][col]) {

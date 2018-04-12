@@ -79,7 +79,7 @@ public class SearchClient {
                         Node.agentColor = agentColor;
                     }
 				} else if ('A' <= chr && chr <= 'Z') { // Box.
-					this.initialState.boxes[row][col] = chr;
+					this.initialState.boxes.put(new Coordinates(row, col), chr);
 				} else if ('a' <= chr && chr <= 'z') { // Goal.
 					this.initialState.goals[row][col] = chr;
 				} else if (chr == ' ') {
