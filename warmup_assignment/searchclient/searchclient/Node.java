@@ -7,6 +7,7 @@ import java.util.LinkedList;
 import java.util.Random;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Timer;
 
 import searchclient.ColorHelper.*;
 import searchclient.Command.Type;
@@ -45,8 +46,7 @@ public class Node {
 	//
 
 	public static boolean[][] walls;
-	public char[][] boxes = new char[MAX_ROW][MAX_COL];
-	public Map<String, String> boxMap = new HashMap<String, String>();
+	public Map<String, Character> boxMap = new HashMap<String, Character>();
 	public static char[][] goals;
 
 	public Node parent;
@@ -78,11 +78,11 @@ public class Node {
 			for (int col = 1; col < MAX_COL - 1; col++) {
 				char g = goals[row][col];						
 				char b = 0;
-
+				
 				if (this.boxMap.get(row + "," + col) != null) {
-					b = Character.toLowerCase(this.boxMap.get(row + "," + col).charAt(0));
+					b = Character.toLowerCase(this.boxMap.get(row + "," + col));
 				}
-
+				
 				if (g > 0 && b != g) {
 					return false;
 				}
@@ -120,10 +120,16 @@ public class Node {
 						n.agentRow = newAgentRow;
 						n.agentCol = newAgentCol;
 
-						String boxC = n.boxMap.get(newAgentRow + "," + newAgentCol);
+						//long start = System.nanoTime();
+
+						Character boxC = n.boxMap.get(newAgentRow + "," + newAgentCol);
 						n.boxMap.remove(newAgentRow + "," + newAgentCol);
 						n.boxMap.put(newBoxRow + "," + newBoxCol, boxC);
 
+						//long end = System.nanoTime();
+						//long microseconds = (end - start) / 1000;
+						//System.err.println("Timer: " + microseconds + " microseconds");
+						
 						expandedNodes.add(n);
 					}
 				}
@@ -139,7 +145,7 @@ public class Node {
 						n.agentRow = newAgentRow;
 						n.agentCol = newAgentCol;
 
-						String boxC = n.boxMap.get(boxRow + "," + boxCol);
+						Character boxC = n.boxMap.get(boxRow + "," + boxCol);
 						n.boxMap.remove(boxRow + "," + boxCol);
 						n.boxMap.put(this.agentRow + "," + this.agentCol, boxC);
 
@@ -153,7 +159,7 @@ public class Node {
 	}
 
 	private boolean cellIsFree(int row, int col) {
-		return !this.walls[row][col] && this.boxMap.get(row + "," + col) == null;
+		return !walls[row][col] && this.boxMap.get(row + "," + col) == null;
 	}
 
 	private boolean boxAt(int row, int col) {
@@ -163,7 +169,7 @@ public class Node {
 	private Node ChildNode() {
 		Node copy = new Node(this);
 
-		copy.boxMap = new HashMap<String,String>(this.boxMap);
+		copy.boxMap = new HashMap<String,Character>(this.boxMap);
 
 		return copy;
 	}
@@ -185,9 +191,9 @@ public class Node {
 			int result = 1;
 			result = prime * result + this.agentCol;
 			result = prime * result + this.agentRow;
-			result = prime * result + (boxMap != null ? boxMap.hashCode() : 0);
-			result = prime * result + Arrays.deepHashCode(this.goals);
-			result = prime * result + Arrays.deepHashCode(this.walls);
+			result = prime * result + (this.boxMap != null ? this.boxMap.hashCode() : 0);
+			result = prime * result + Arrays.deepHashCode(goals);
+			result = prime * result + Arrays.deepHashCode(walls);
 			this._hash = result;
 		}
 		return this._hash;
@@ -204,11 +210,7 @@ public class Node {
 		Node other = (Node) obj;
 		if (this.agentRow != other.agentRow || this.agentCol != other.agentCol)
 			return false;
-		if (!Arrays.deepEquals(this.goals, other.goals))
-			return false;
-		if (!Arrays.deepEquals(this.walls, other.walls))
-			return false;
-		if (boxMap != null ? !boxMap.equals(other.boxMap) : other.boxMap != null) return false;
+		if (this.boxMap != null ? !this.boxMap.equals(other.boxMap) : other.boxMap != null) return false;
 		return true;
 	}
 
@@ -217,13 +219,13 @@ public class Node {
 	public String toString() {
 		StringBuilder s = new StringBuilder();
 		for (int row = 0; row < MAX_ROW; row++) {
-			if (!this.walls[row][0]) {
+			if (!walls[row][0]) {
 				break;
 			}
 			for (int col = 0; col < MAX_COL; col++) {
-                if (this.goals[row][col] > 0) {
-					s.append(this.goals[row][col]);
-				} else if (this.walls[row][col]) {
+                if (goals[row][col] > 0) {
+					s.append(goals[row][col]);
+				} else if (walls[row][col]) {
 					s.append("+");
 				} else if (row == this.agentRow && col == this.agentCol) {
 					s.append("0");

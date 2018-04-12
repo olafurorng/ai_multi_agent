@@ -40,7 +40,7 @@ public abstract class Heuristic implements Comparator<Node> {
 
 			// check if a box is within the goal and if the box matches the goal type
 			if (n.boxMap.get(row + "," + col) != null
-					&& Character.toLowerCase(n.boxMap.get(row + "," + col).charAt(0)) == goalChar.get(i)) {
+					&& Character.toLowerCase(n.boxMap.get(row + "," + col)) == goalChar.get(i)) {
 				goalsFinished.set(i, true);
 			} else {
 				goalsFinished.set(i, false);

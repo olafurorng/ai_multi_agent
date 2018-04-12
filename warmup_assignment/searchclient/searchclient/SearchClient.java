@@ -80,8 +80,7 @@ public class SearchClient {
                         Node.agentColor = agentColor;
                     }
 				} else if ('A' <= chr && chr <= 'Z') { // Box.
-					String boxString = row + "," + col;
-					this.initialState.boxMap.put(boxString, Character.toString(chr));
+					this.initialState.boxMap.put(row + "," + col, chr);
 				} else if ('a' <= chr && chr <= 'z') { // Goal.
 					this.initialState.goals[row][col] = chr;
 				} else if (chr == ' ') {
