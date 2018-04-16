@@ -47,6 +47,8 @@ public class Node {
 	public HashMap<String, Character> boxMap = new HashMap<String, Character>();
 	public static HashMap<String, Goals> goals = new HashMap<String, Goals>();
 
+	public String newBox;
+
 	public Node parent;
 	public Command action;
 
@@ -126,7 +128,7 @@ public class Node {
 						Character boxC = n.boxMap.get(newAgentRow + "," + newAgentCol);
 						n.boxMap.remove(newAgentRow + "," + newAgentCol);
 						n.boxMap.put(newBoxRow + "," + newBoxCol, boxC);
-
+						n.newBox = newBoxRow + "," + newBoxCol;
 						// System.err.println("Box Push: " + newBoxRow + "," + newBoxCol);
 
 						//long end = System.nanoTime();
@@ -151,7 +153,7 @@ public class Node {
 						Character boxC = n.boxMap.get(boxRow + "," + boxCol);
 						n.boxMap.remove(boxRow + "," + boxCol);
 						n.boxMap.put(this.agentRow + "," + this.agentCol, boxC);
-
+						n.newBox = this.agentRow + "," + this.agentCol;
 						// System.err.println("Box Pull: " + this.agentRow + "," + this.agentCol);
 
 						expandedNodes.add(n);
@@ -185,8 +187,7 @@ public class Node {
 		Node copy = new Node(this);
     
 		copy.boxMap = new HashMap<String,Character>(this.boxMap);
-		//copy.boxMap = (HashMap) this.boxMap.clone();
-    
+
 		return copy;
 	}
 

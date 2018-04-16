@@ -37,7 +37,7 @@ public abstract class Heuristic implements Comparator<Node> {
 
 					int length = width + height;
 				
-					minLength += length * 10;
+					minLength += length * 100;
 			
 				}
 				else if (currentGoal != null
@@ -70,15 +70,22 @@ public abstract class Heuristic implements Comparator<Node> {
 					int height = Math.abs(n.agentRow - row);
 
 					int length = width + height;
-							
-					minLength += length;
+
+					//minLength += length;
+					Character currentBoxPlace = n.boxMap.get(n.newBox);
+					if (Character.toLowerCase(currentBoxPlace) == currentGoal.getCharacter()) {
+						minLength += length * 10 ;
+					}	
+					else {
+						minLength += length;
+					}
 					
 				}
 			}
 
 		}
 	
-		return (goalSize - goalsFinished)*10000 + minLength;
+		return (goalSize - goalsFinished)*100000 + minLength;
 	}
 
 	public abstract int f(Node n);

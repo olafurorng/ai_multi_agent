@@ -98,7 +98,7 @@ public class SearchClient {
 		}
 
 		// Lets relax the problem by adding edges / walls
-		addingWalls(this.initialState);
+		// addingWalls(this.initialState);
 	}
 
 	/**
