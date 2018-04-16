@@ -170,11 +170,11 @@ public class Node {
 	}
 
     public boolean cellIsFreeAndNoGoalOrAgent(int row, int col) {
-        return !this.walls[row][col] && this.boxes[row][col] == 0 && !(agentRow == row && agentCol == col) && goals[row][col] == 0;
+        return  walls.get(row + "," + col) == null && this.boxMap.get(row + "," + col) == null && !(agentRow == row && agentCol == col) && goals.get(row + "," + col) == null;
     }
 
 	public boolean cellIsFreeOfGoalBoxAndAgent(int row, int col) {
-		return !(agentRow == row && agentCol == col) && this.boxes[row][col] == 0 && goals[row][col] == 0;
+		return !(agentRow == row && agentCol == col) && this.boxMap.get(row + "," + col) == null && goals.get(row + "," + col) == null;
 	}
 
 	private boolean boxAt(int row, int col) {
@@ -235,16 +235,17 @@ public class Node {
 	public String toString() {
 		StringBuilder s = new StringBuilder();
 		for (int row = 0; row < MAX_ROW; row++) {
-			//if (!walls[row][0]) {
-			//		break;
-			//}
+			if (walls.get(row + "," + 0) == null) {
+					break;
+			}
 			for (int col = 0; col < MAX_COL; col++) {
-                //if (goals[row][col] > 0) {
-				//	s.append(goals[row][col]);
-				//} 
-				//if (walls[row][col]) {
-				//	s.append("+");
-				if (row == this.agentRow && col == this.agentCol) {
+				if (this.boxMap.get(row + "," + col) != null) {
+					s.append(this.boxMap.get(row + "," + col));
+				} else if (goals.get(row + "," + col) != null) {
+					s.append(goals.get(row + "," + col).getCharacter());
+				} else if (walls.get(row + "," + col) != null) {
+					s.append("+");
+				} else if (row == this.agentRow && col == this.agentCol) {
 					s.append("0");
 				} else {
 					s.append(" ");
