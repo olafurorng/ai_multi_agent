@@ -5,7 +5,6 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.util.*;
 
-import searchclient.Memory;
 import searchclient.Strategy.*;
 import searchclient.Heuristic.*;
 import searchclient.ColorHelper.*;
@@ -97,6 +96,176 @@ public class SearchClient {
 
 			row++;
 		}
+
+		// Lets relax the problem by adding edges / walls
+		addingWalls(this.initialState);
+	}
+
+	/**
+	 * This is a type of Relaxed problem, more specific: Adding edges relaxed problem.
+	 * Walls or edges are added to decrease the size of the level, but has rules to
+	 * prevent that the level won't become unsolvable
+	 *
+	 * Cons:
+	 * 		- Length of the solution can be longer, e.g. in SAsoko3_48.lvl
+	 * 		- Level which are not squared, have many free cells, and therefore can
+	 * 		  become unsolvable.
+	 */
+	private void addingWalls(Node initialState) {
+		System.err.println("----------------------------------------");
+		System.err.println("Walls before");
+		System.err.println(initialState.toString());
+
+
+		// we will start adding walls in free cells which are outside the level
+		// lets start with adding from the left side
+		for (int i = 0; i < Node.MAX_ROW; i++) {
+			for (int j = 0; j < Node.MAX_COL; j++) {
+				if (Node.walls[i][j]) {
+					break;
+				} else {
+					Node.walls[i][j] = true;
+				}
+			}
+		}
+		// then add from the right side
+		for (int i = 0; i < Node.MAX_ROW; i++) {
+			for (int j = Node.MAX_COL - 1; j >= 0 ; j--) {
+				if (Node.walls[i][j]) {
+					break;
+				} else {
+					Node.walls[i][j] = true;
+				}
+			}
+		}
+
+
+
+		// count how many free cells compared to number of agents+boxes
+		int numberOfNewBoxesThisRound = 1000; // initialized as some number above 0
+		int iterations = 0;
+
+		while (numberOfNewBoxesThisRound > 0) {
+			numberOfNewBoxesThisRound = 0;
+			for (int i = 0; i < Node.MAX_ROW; i++) {
+				for (int j = 0; j < Node.MAX_COL; j++) {
+					if (initialState.cellIsFreeAndNoGoalOrAgent(i,j)) {
+						// now the cell is free, so we check if there is no
+						// goal, box or agent around that cell
+						boolean topFree = initialState.cellIsFreeOfGoalBoxAndAgent(i - 1, j);
+						boolean topRightFree = initialState.cellIsFreeOfGoalBoxAndAgent(i - 1, j + 1);
+						boolean rightFree = initialState.cellIsFreeOfGoalBoxAndAgent(i, j + 1);
+						boolean bottomRighFree = initialState.cellIsFreeOfGoalBoxAndAgent(i + 1, j + 1);
+						boolean bottomFree = initialState.cellIsFreeOfGoalBoxAndAgent(i + 1, j);
+						boolean leftBottomFree = initialState.cellIsFreeOfGoalBoxAndAgent(i + 1, j - 1);
+						boolean leftFree = initialState.cellIsFreeOfGoalBoxAndAgent(i, j - 1);
+						boolean leftTopFree = initialState.cellIsFreeOfGoalBoxAndAgent(i - 1, j - 1);
+
+						if (topFree && topRightFree && rightFree && bottomRighFree && bottomFree && leftBottomFree && leftFree && leftTopFree) {
+							// now there is not goal, box or agent near this cell
+
+							boolean wallTop = Node.walls[i - 1][ j];
+							boolean wallTopRight = Node.walls[i - 1][ j + 1];
+							boolean wallRight = Node.walls[i][ j + 1];
+							boolean wallBottomRight = Node.walls[i + 1][ j + 1];
+							boolean wallBottom = Node.walls[i + 1][ j];
+							boolean wallLeftBottom = Node.walls[i + 1][ j - 1];
+							boolean wallLeft = Node.walls[i][ j - 1];
+							boolean wallLeftTop = Node.walls[i - 1][ j - 1];
+
+							/*
+								Wall is said to be touching a cell, if the wall is on the left, right, top or bottom.
+								Wall is said to be nearby a cell, if the wall is on the top-right, right-bottom, bottom-left or left-top
+							 */
+							int numberOfWallsTouching = 0;
+
+							if (wallTop) numberOfWallsTouching++;
+							if (wallRight) numberOfWallsTouching++;
+							if (wallBottom) numberOfWallsTouching++;
+							if (wallLeft) numberOfWallsTouching++;
+
+
+							// 4 WALLS TOUCHING
+							if (numberOfWallsTouching == 4) {
+								// we can safely add a wall
+								Node.walls[i][j] = true;
+								numberOfNewBoxesThisRound++;
+							}
+
+							// 3 WALLS TOUCHING
+							if (numberOfWallsTouching == 3) {
+								// we can safely add a wall
+								Node.walls[i][j] = true;
+								numberOfNewBoxesThisRound++;
+							}
+
+							// 2 WALLS TOUCHING
+							if (numberOfWallsTouching == 2) {
+								// we exclude if the cell is part of a "tunnel", i.e.
+								// - if the touching walls are opposite, i.e. walltop and wallbottom or wallright and wallleft
+								// - if the opposite nearby cell to the two touching walls, is a wall
+
+								// walls are top and left
+								if (wallTop && wallLeft && !wallBottomRight) {
+									Node.walls[i][j] = true;
+									numberOfNewBoxesThisRound++;
+								}
+
+								// walls are top and right
+								if (wallTop && wallRight && !wallLeftBottom) {
+									Node.walls[i][j] = true;
+									numberOfNewBoxesThisRound++;
+								}
+
+								// walls are right and bottom
+								if (wallRight && wallBottom && !wallLeftTop) {
+									Node.walls[i][j] = true;
+									numberOfNewBoxesThisRound++;
+								}
+
+								// walls are bottom and left
+								if (wallBottom && wallLeft && !wallTopRight) {
+									Node.walls[i][j] = true;
+									numberOfNewBoxesThisRound++;
+								}
+							}
+
+							// 1 WALL TOUCHING
+							if (numberOfWallsTouching == 1) {
+								// we exclude if the cell is part of a "tunnel", i.e.
+								// - if opposite nearby cell to the one touching wall, is a wall
+								if (wallTop && !wallBottomRight && !wallLeftBottom) {
+									Node.walls[i][j] = true;
+									numberOfNewBoxesThisRound++;
+								}
+
+								if (wallRight && !wallLeftTop && !wallLeftBottom) {
+									Node.walls[i][j] = true;
+									numberOfNewBoxesThisRound++;
+								}
+
+								if (wallBottom && !wallTopRight && !wallLeftTop) {
+									Node.walls[i][j] = true;
+									numberOfNewBoxesThisRound++;
+								}
+
+								if (wallLeft && !wallBottomRight && !wallTopRight) {
+									Node.walls[i][j] = true;
+									numberOfNewBoxesThisRound++;
+								}
+							}
+
+						}
+					}
+				}
+			}
+
+			iterations++;
+		}
+		System.err.println("----------------------------------------");
+		System.err.println("Adding walls done, iterations: " + iterations);
+		System.err.println(initialState.toString());
+		System.err.println("----------------------------------------");
 	}
 
 	public LinkedList<Node> Search(Strategy strategy) throws IOException {
