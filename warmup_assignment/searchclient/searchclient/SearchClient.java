@@ -9,6 +9,9 @@ import searchclient.Memory;
 import searchclient.Strategy.*;
 import searchclient.Heuristic.*;
 import searchclient.ColorHelper.*;
+import searchclient.Goals.*;
+
+import java.math.BigDecimal;
 
 public class SearchClient {
 	public Node initialState;
@@ -65,7 +68,7 @@ public class SearchClient {
 				char chr = serverMessageLine.charAt(col);
 
 				if (chr == '+') { // Wall.
-					this.initialState.walls[row][col] = true;
+					this.initialState.walls.put(row + "," + col, true);
 				} else if ('0' <= chr && chr <= '9') { // Agent.
 					if (agentFound) {
 						System.err.println("Error, not a single agent level");
@@ -82,7 +85,8 @@ public class SearchClient {
 				} else if ('A' <= chr && chr <= 'Z') { // Box.
 					this.initialState.boxMap.put(row + "," + col, chr);
 				} else if ('a' <= chr && chr <= 'z') { // Goal.
-					this.initialState.goals[row][col] = chr;
+					Goals goal = new Goals(chr, false);
+					this.initialState.goals.put(row + "," + col, goal);
 				} else if (chr == ' ') {
 					// Free space.
 				} else {
@@ -101,6 +105,7 @@ public class SearchClient {
 
 		int iterations = 0;
 		while (true) {
+			//long beforeUsedMem=(Runtime.getRuntime().totalMemory()-Runtime.getRuntime().freeMemory());
             if (iterations == 10000) {
 				System.err.println(strategy.searchStatus());
 				iterations = 0;
@@ -118,10 +123,19 @@ public class SearchClient {
 
 			strategy.addToExplored(leafNode);
 			for (Node n : leafNode.getExpandedNodes()) { // The list of expanded nodes is shuffled randomly; see Node.java.
+				
 				if (!strategy.isExplored(n) && !strategy.inFrontier(n)) {
 					strategy.addToFrontier(n);
 				}
 			}
+			long afterUsedMem=(Runtime.getRuntime().totalMemory()-Runtime.getRuntime().freeMemory());
+
+			//System.err.println("Memory of expanded nodes: " + ((afterUsedMem / (1024 * 1024 * 1000.0)) - (beforeUsedMem / (1024 * 1024 * 1000.0))));
+			//BigDecimal test = new BigDecimal((afterUsedMem / (1024 * 1024 * 1000.0)) - (beforeUsedMem / (1024 * 1024 * 1000.0)));
+			//BigDecimal test2 = new BigDecimal((beforeUsedMem / (1024 * 1024 * 1000.0)));
+			//System.err.println("Memory of expanded nodes: " + test);
+			//System.err.println("Memory of expanded nodes: " + test2);
+		
 			iterations++;
 		}
 	}

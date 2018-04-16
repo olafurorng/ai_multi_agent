@@ -3,66 +3,88 @@ package searchclient;
 import java.util.Comparator;
 import java.util.ArrayList;
 import java.util.List;
-
-
+import searchclient.Command.Type;
+import java.util.HashMap;
+import java.util.Map;
+import searchclient.Goals.*;
 import searchclient.NotImplementedException;
 
 public abstract class Heuristic implements Comparator<Node> {
-
-	List<Integer> goalCol = new ArrayList<Integer>();
-	List<Integer> goalRow = new ArrayList<Integer>();
-	List<Character> goalChar = new ArrayList<Character>();
-
-	List<Boolean> goalsFinished = new ArrayList<Boolean>();
+	int goalSize;
 
 	public Heuristic(Node initialState) {
 		// Here's a chance to pre-process the static parts of the level.
-
-		for (int row = 1; row < Node.MAX_ROW - 1; row++) {
-			for (int col = 1; col < Node.MAX_COL - 1; col++) {
-				if (Node.goals[row][col] > 0) {
-					goalCol.add(col);
-					goalRow.add(row);
-					goalChar.add(Node.goals[row][col]);
-					goalsFinished.add(false);
-				}
-			}
-		}
+		goalSize = Node.goals.size();
 	}
 
 	public int h(Node n) {
-		int countGoalsNotFinished = 0;
+		int goalsFinished = 0;
 
-		// first check wich goals are finished
-		for (int i = 0; i < goalsFinished.size(); i++) {
-			int col = goalCol.get(i);
-			int row = goalRow.get(i);
+		int minLength = Integer.MAX_VALUE;
 
-			// check if a box is within the goal and if the box matches the goal type
-			if (n.boxMap.get(row + "," + col) != null
-					&& Character.toLowerCase(n.boxMap.get(row + "," + col)) == goalChar.get(i)) {
-				goalsFinished.set(i, true);
-			} else {
-				goalsFinished.set(i, false);
-				countGoalsNotFinished++;
+		if (n.action.actionType == Type.Move) {
+	
+			for (String key : n.boxMap.keySet()) {
+				String[] boxArray = key.split(",");
+				int row = Integer.parseInt(boxArray[0]);
+				int col = Integer.parseInt(boxArray[1]);
+				Goals currentGoal = Node.goals.get(row + "," + col);
+
+				if (currentGoal == null) {
+					int width = Math.abs(n.agentCol - row);
+					int height = Math.abs(n.agentRow - col);
+
+					int length = width + height;
+					if (length < minLength) {
+						minLength = length * 100;
+					}
+				}
+				else if (currentGoal != null
+					&& Character.toLowerCase(n.boxMap.get(row + "," + col)) == currentGoal.getCharacter()) {
+					currentGoal.setState(true);
+					goalsFinished++;
+				} 
 			}
 		}
+		else if (n.action.actionType == Type.Push || n.action.actionType == Type.Pull) {
 
-		// iterate over the goals which are unfinished and find the shortest goal
-		// and calculate the length (the heurastic function) to the goal
-		int minLength = Integer.MAX_VALUE;
-		for (int i = 0; i < goalsFinished.size(); i++) {
-			if (!goalsFinished.get(i)) {
-				int width = Math.abs(n.agentCol - goalCol.get(i));
-				int height = Math.abs(n.agentRow - goalRow.get(i));
+			for (Map.Entry<String, Goals> entry : Node.goals.entrySet()) {
+				String key = entry.getKey();
+				Goals currentGoal = entry.getValue();
 
-				int length = width + height;
-				if (length < minLength) {
-					minLength = length;
+				String[] goalArray = key.split(",");
+				int row = Integer.parseInt(goalArray[0]);
+				int col = Integer.parseInt(goalArray[1]);
+				Character currentBox = n.boxMap.get(row + "," + col);
+
+				if (currentBox != null
+					&& Character.toLowerCase(currentBox) == currentGoal.getCharacter()) {
+						currentGoal.setState(true);
+					goalsFinished++;
+				} else {
+					currentGoal.setState(false);					
+				}	
+
+				if (!currentGoal.getState()) {
+					int width = Math.abs(n.agentCol - col);
+					int height = Math.abs(n.agentRow - row);
+
+					int length = width + height;
+					
+					if (length < minLength) {
+						minLength = length;
+					}
 				}
 			}
+			
+			// Finishing state with all goals finished
+			if (minLength == Integer.MAX_VALUE) {
+				minLength = 0;
+			}
+
 		}
-		return countGoalsNotFinished*100 + minLength;
+	
+		return (goalSize - goalsFinished)*1000 + minLength;
 	}
 
 	public abstract int f(Node n);
