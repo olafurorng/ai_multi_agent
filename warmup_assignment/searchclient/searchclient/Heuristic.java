@@ -18,9 +18,10 @@ public abstract class Heuristic implements Comparator<Node> {
 	}
 
 	public int h(Node n) {
+	
 		int goalsFinished = 0;
 
-		int minLength = Integer.MAX_VALUE;
+		int minLength = 0;
 
 		if (n.action.actionType == Type.Move) {
 	
@@ -35,19 +36,18 @@ public abstract class Heuristic implements Comparator<Node> {
 					int height = Math.abs(n.agentRow - col);
 
 					int length = width + height;
-					if (length < minLength) {
-						minLength = length * 100;
-					}
+				
+					minLength += length * 10;
+			
 				}
 				else if (currentGoal != null
 					&& Character.toLowerCase(n.boxMap.get(row + "," + col)) == currentGoal.getCharacter()) {
-					currentGoal.setState(true);
 					goalsFinished++;
 				} 
 			}
 		}
 		else if (n.action.actionType == Type.Push || n.action.actionType == Type.Pull) {
-
+	
 			for (Map.Entry<String, Goals> entry : Node.goals.entrySet()) {
 				String key = entry.getKey();
 				Goals currentGoal = entry.getValue();
@@ -70,21 +70,15 @@ public abstract class Heuristic implements Comparator<Node> {
 					int height = Math.abs(n.agentRow - row);
 
 					int length = width + height;
+							
+					minLength += length;
 					
-					if (length < minLength) {
-						minLength = length;
-					}
 				}
-			}
-			
-			// Finishing state with all goals finished
-			if (minLength == Integer.MAX_VALUE) {
-				minLength = 0;
 			}
 
 		}
 	
-		return (goalSize - goalsFinished)*1000 + minLength;
+		return (goalSize - goalsFinished)*10000 + minLength;
 	}
 
 	public abstract int f(Node n);
