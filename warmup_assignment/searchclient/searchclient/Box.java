@@ -26,4 +26,22 @@ public class Box {
     public void setPriority(int priority) {
         this.priority = priority;
     }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+
+        Box box = (Box) o;
+
+        if (character != box.character) return false;
+        return priority == box.priority;
+    }
+
+    @Override
+    public int hashCode() {
+        int result = (int) character;
+        result = 31 * result + priority;
+        return result;
+    }
 }
