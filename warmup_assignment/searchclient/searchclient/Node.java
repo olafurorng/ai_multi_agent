@@ -12,6 +12,7 @@ import java.math.BigDecimal;
 
 import searchclient.ColorHelper.*;
 import searchclient.Goals.*;
+import searchclient.Box.*;
 import searchclient.Command.Type;
 
 public class Node {
@@ -44,7 +45,7 @@ public class Node {
 	//
 
 	public static HashMap<String, Boolean> walls = new HashMap<String, Boolean>();
-	public HashMap<String, Character> boxMap = new HashMap<String, Character>();
+	public HashMap<String, Box> boxMap = new HashMap<String, Box>();
 	public static HashMap<String, Goals> goals = new HashMap<String, Goals>();
 
 	public String newBox;
@@ -80,7 +81,7 @@ public class Node {
 			char b = 0;
 			
 			if (this.boxMap.get(goalArray[0] + "," + goalArray[1]) != null) {
-				b = Character.toLowerCase(this.boxMap.get(goalArray[0] + "," + goalArray[1]));
+				b = Character.toLowerCase(this.boxMap.get(goalArray[0] + "," + goalArray[1]).getCharacter());
 			}
 			
 			if (g > 0 && b != g) {
@@ -100,7 +101,7 @@ public class Node {
 			int newAgentCol = this.agentCol + Command.dirToColChange(c.dir1);
 
 			// System.err.println("Agent: " + newAgentCol + "," + newAgentRow);
-
+			// System.err.println("Boxes: " + boxMap);
 			if (c.actionType == Type.Move) {
 				// Check if there's a wall or box on the cell to which the agent is moving
 				if (this.cellIsFree(newAgentRow, newAgentCol)) {
@@ -124,11 +125,15 @@ public class Node {
 						n.agentCol = newAgentCol;
 
 						//long start = System.nanoTime();
-
-						Character boxC = n.boxMap.get(newAgentRow + "," + newAgentCol);
+						Box currentBox =  n.boxMap.get(newAgentRow + "," + newAgentCol);
+						//System.err.println("char: " + currentBox.getCharacter() + "pri: " + currentBox.getPriority() );
+						
 						n.boxMap.remove(newAgentRow + "," + newAgentCol);
-						n.boxMap.put(newBoxRow + "," + newBoxCol, boxC);
+						Box box = new Box(currentBox.getCharacter(), currentBox.getPriority());
+
+						n.boxMap.put(newBoxRow + "," + newBoxCol, box);
 						n.newBox = newBoxRow + "," + newBoxCol;
+						//System.err.println("Boxes: " + n.boxMap);
 						// System.err.println("Box Push: " + newBoxRow + "," + newBoxCol);
 
 						//long end = System.nanoTime();
@@ -150,9 +155,12 @@ public class Node {
 						n.agentRow = newAgentRow;
 						n.agentCol = newAgentCol;
 
-						Character boxC = n.boxMap.get(boxRow + "," + boxCol);
+						Box currentBox =  n.boxMap.get(boxRow + "," + boxCol);
 						n.boxMap.remove(boxRow + "," + boxCol);
-						n.boxMap.put(this.agentRow + "," + this.agentCol, boxC);
+						
+						Box box = new Box(currentBox.getCharacter(), currentBox.getPriority());
+						
+						n.boxMap.put(this.agentRow + "," + this.agentCol, box);
 						n.newBox = this.agentRow + "," + this.agentCol;
 						// System.err.println("Box Pull: " + this.agentRow + "," + this.agentCol);
 
@@ -186,7 +194,7 @@ public class Node {
 	private Node ChildNode() {
 		Node copy = new Node(this);
     
-		copy.boxMap = new HashMap<String,Character>(this.boxMap);
+		copy.boxMap = new HashMap<String,Box>(this.boxMap);
 
 		return copy;
 	}
@@ -241,7 +249,7 @@ public class Node {
 			}
 			for (int col = 0; col < MAX_COL; col++) {
 				if (this.boxMap.get(row + "," + col) != null) {
-					s.append(this.boxMap.get(row + "," + col));
+					s.append(this.boxMap.get(row + "," + col).getCharacter());
 				} else if (goals.get(row + "," + col) != null) {
 					s.append(goals.get(row + "," + col).getCharacter());
 				} else if (walls.get(row + "," + col) != null) {

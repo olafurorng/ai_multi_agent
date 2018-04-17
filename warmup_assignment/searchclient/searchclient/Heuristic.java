@@ -7,6 +7,7 @@ import searchclient.Command.Type;
 import java.util.HashMap;
 import java.util.Map;
 import searchclient.Goals.*;
+import searchclient.Box.*;
 import searchclient.NotImplementedException;
 
 public abstract class Heuristic implements Comparator<Node> {
@@ -41,7 +42,7 @@ public abstract class Heuristic implements Comparator<Node> {
 			
 				}
 				else if (currentGoal != null
-					&& Character.toLowerCase(n.boxMap.get(row + "," + col)) == currentGoal.getCharacter()) {
+					&& Character.toLowerCase(n.boxMap.get(row + "," + col).getCharacter()) == currentGoal.getCharacter()) {
 					goalsFinished++;
 				} 
 			}
@@ -55,10 +56,10 @@ public abstract class Heuristic implements Comparator<Node> {
 				String[] goalArray = key.split(",");
 				int row = Integer.parseInt(goalArray[0]);
 				int col = Integer.parseInt(goalArray[1]);
-				Character currentBox = n.boxMap.get(row + "," + col);
-
+				Box currentBox = n.boxMap.get(row + "," + col);
+	
 				if (currentBox != null
-					&& Character.toLowerCase(currentBox) == currentGoal.getCharacter()) {
+					&& Character.toLowerCase(currentBox.getCharacter()) == currentGoal.getCharacter()) {
 						currentGoal.setState(true);
 					goalsFinished++;
 				} else {
@@ -71,10 +72,10 @@ public abstract class Heuristic implements Comparator<Node> {
 
 					int length = width + height;
 
-					//minLength += length;
-					Character currentBoxPlace = n.boxMap.get(n.newBox);
-					if (Character.toLowerCase(currentBoxPlace) == currentGoal.getCharacter()) {
-						minLength += length * 10 ;
+					Box currentBoxPlace = n.boxMap.get(n.newBox);
+			
+					if (Character.toLowerCase(currentBoxPlace.getCharacter()) == currentGoal.getCharacter()) {
+						minLength += length * 10;
 					}	
 					else {
 						minLength += length;
