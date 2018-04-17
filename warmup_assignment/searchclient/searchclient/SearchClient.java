@@ -9,6 +9,7 @@ import searchclient.Strategy.*;
 import searchclient.Heuristic.*;
 import searchclient.ColorHelper.*;
 import searchclient.Goals.*;
+import searchclient.Box.*;
 
 import java.math.BigDecimal;
 
@@ -82,7 +83,8 @@ public class SearchClient {
                         Node.agentColor = agentColor;
                     }
 				} else if ('A' <= chr && chr <= 'Z') { // Box.
-					this.initialState.boxMap.put(row + "," + col, chr);
+					Box box = new Box(chr, 0);
+					this.initialState.boxMap.put(row + "," + col, box);
 				} else if ('a' <= chr && chr <= 'z') { // Goal.
 					Goals goal = new Goals(chr, false);
 					this.initialState.goals.put(row + "," + col, goal);
