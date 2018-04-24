@@ -86,7 +86,7 @@ public class SearchClient {
 					Box box = new Box(chr, 0);
 					this.initialState.boxMap.put(row + "," + col, box);
 				} else if ('a' <= chr && chr <= 'z') { // Goal.
-					Goals goal = new Goals(chr, false);
+					Goals goal = new Goals(chr, false, 0);
 					this.initialState.goals.put(row + "," + col, goal);
 				} else if (chr == ' ') {
 					// Free space.
