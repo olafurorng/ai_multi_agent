@@ -1,25 +1,20 @@
 package searchclient;
 
 import java.util.Comparator;
-import java.util.ArrayList;
-import java.util.List;
 import searchclient.Command.Type;
-import java.util.HashMap;
+
 import java.util.Map;
-import searchclient.Goals.*;
-import searchclient.Box.*;
-import searchclient.NotImplementedException;
 
 public abstract class Heuristic implements Comparator<Node> {
 	int goalSize;
 
 	public Heuristic(Node initialState) {
 		// Here's a chance to pre-process the static parts of the level.
-		goalSize = Node.goals.size();
+		goalSize = Node.GOALS.size();
 
 		int counter = 1;
 
-		for (Map.Entry<String, Goals> entry : Node.goals.entrySet()) {
+		for (Map.Entry<String, Goals> entry : Node.GOALS.entrySet()) {
 			int minLength = Integer.MAX_VALUE;
 			Box minBox = null;
 
@@ -68,7 +63,7 @@ public abstract class Heuristic implements Comparator<Node> {
 				String[] boxArray = key.split(",");
 				int row = Integer.parseInt(boxArray[0]);
 				int col = Integer.parseInt(boxArray[1]);
-				Goals currentGoal = Node.goals.get(row + "," + col);
+				Goals currentGoal = Node.GOALS.get(row + "," + col);
 
 				// Find closest box
 				if (currentGoal == null) {
@@ -95,7 +90,7 @@ public abstract class Heuristic implements Comparator<Node> {
 		}
 		else if (n.action.actionType == Type.Push || n.action.actionType == Type.Pull) {
 	
-			for (Map.Entry<String, Goals> entry : Node.goals.entrySet()) {
+			for (Map.Entry<String, Goals> entry : Node.GOALS.entrySet()) {
 				String key = entry.getKey();
 				Goals currentGoal = entry.getValue();
 

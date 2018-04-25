@@ -1,18 +1,13 @@
 package searchclient;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collections;
 import java.util.LinkedList;
 import java.util.Random;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.Timer;
-import java.math.BigDecimal;
 
 import searchclient.ColorHelper.*;
-import searchclient.Goals.*;
-import searchclient.Box.*;
 import searchclient.Command.Type;
 
 public class Node {
@@ -40,13 +35,13 @@ public class Node {
 	// Row 2: (2,0) (2,1) (2,2) (2,3) ...
 	// ...
 	// (Start in the top left corner, first go down, then go right)
-	// E.g. this.walls[2] is an array of booleans having size MAX_COL.
-	// this.walls[row][col] is true if there's a wall at (row, col)
+	// E.g. this.WALLS[2] is an array of booleans having size MAX_COL.
+	// this.WALLS[row][col] is true if there's a wall at (row, col)
 	//
 
-	public static HashMap<String, Boolean> walls = new HashMap<String, Boolean>();
-	public HashMap<String, Box> boxMap = new HashMap<String, Box>();
-	public static HashMap<String, Goals> goals = new HashMap<String, Goals>();
+	public static HashMap<String, Boolean> WALLS = new HashMap<String, Boolean>();
+	public Map<String, Box> boxMap = new HashMap<String, Box>();
+	public static HashMap<String, Goals> GOALS = new HashMap<String, Goals>();
 
 	public String newBox;
 
@@ -75,9 +70,9 @@ public class Node {
 	}
 
 	public boolean isGoalState() {
-		for (String key : goals.keySet()) {
+		for (String key : GOALS.keySet()) {
 			String[] goalArray = key.split(",");
-			char g = goals.get(goalArray[0] + "," + goalArray[1]).getCharacter();						
+			char g = GOALS.get(goalArray[0] + "," + goalArray[1]).getCharacter();
 			char b = 0;
 			
 			if (this.boxMap.get(goalArray[0] + "," + goalArray[1]) != null) {
@@ -176,15 +171,15 @@ public class Node {
 	}
 
 	public boolean cellIsFree(int row, int col) {
-		return walls.get(row + "," + col) == null && this.boxMap.get(row + "," + col) == null;
+		return WALLS.get(row + "," + col) == null && this.boxMap.get(row + "," + col) == null;
 	}
 
     public boolean cellIsFreeAndNoGoalOrAgent(int row, int col) {
-        return  walls.get(row + "," + col) == null && this.boxMap.get(row + "," + col) == null && !(agentRow == row && agentCol == col) && goals.get(row + "," + col) == null;
+        return  WALLS.get(row + "," + col) == null && this.boxMap.get(row + "," + col) == null && !(agentRow == row && agentCol == col) && GOALS.get(row + "," + col) == null;
     }
 
 	public boolean cellIsFreeOfGoalBoxAndAgent(int row, int col) {
-		return !(agentRow == row && agentCol == col) && this.boxMap.get(row + "," + col) == null && goals.get(row + "," + col) == null;
+		return !(agentRow == row && agentCol == col) && this.boxMap.get(row + "," + col) == null && GOALS.get(row + "," + col) == null;
 	}
 
 	private boolean boxAt(int row, int col) {
@@ -216,9 +211,7 @@ public class Node {
 			int result = 1;
 			result = prime * result + this.agentCol;
 			result = prime * result + this.agentRow;
-			result = prime * result + (this.boxMap != null ? this.boxMap.hashCode() : 0);
-			result = prime * result + (goals != null ? goals.hashCode() : 0);
-			result = prime * result + (walls != null ? walls.hashCode() : 0);
+			result = prime * result + this.boxMap.hashCode();
 			this._hash = result;
 		}
 		return this._hash;
@@ -235,7 +228,7 @@ public class Node {
 		Node other = (Node) obj;
 		if (this.agentRow != other.agentRow || this.agentCol != other.agentCol)
 			return false;
-		if (this.boxMap != null ? !this.boxMap.equals(other.boxMap) : other.boxMap != null) return false;
+		if (!this.boxMap.equals(other.boxMap)) return false;
 		return true;
 	}
 
@@ -244,15 +237,15 @@ public class Node {
 	public String toString() {
 		StringBuilder s = new StringBuilder();
 		for (int row = 0; row < MAX_ROW; row++) {
-			if (walls.get(row + "," + 0) == null) {
+			if (WALLS.get(row + "," + 0) == null) {
 					break;
 			}
 			for (int col = 0; col < MAX_COL; col++) {
 				if (this.boxMap.get(row + "," + col) != null) {
 					s.append(this.boxMap.get(row + "," + col).getCharacter());
-				} else if (goals.get(row + "," + col) != null) {
-					s.append(goals.get(row + "," + col).getCharacter());
-				} else if (walls.get(row + "," + col) != null) {
+				} else if (GOALS.get(row + "," + col) != null) {
+					s.append(GOALS.get(row + "," + col).getCharacter());
+				} else if (WALLS.get(row + "," + col) != null) {
 					s.append("+");
 				} else if (row == this.agentRow && col == this.agentCol) {
 					s.append("0");
