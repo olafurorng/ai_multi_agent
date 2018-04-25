@@ -34,9 +34,9 @@ public class Node {
 	// this.WALLS[row][col] is true if there's a wall at (row, col)
 	//
 
-	public static List<String> WALLS = new ArrayList<String>();
+	public static List<Coordinate> WALLS = new ArrayList<Coordinate>();
 	public Map<Coordinate, Box> boxMap = new HashMap<Coordinate, Box>();
-	public static HashMap<String, Goals> GOALS = new HashMap<String, Goals>();
+	public static HashMap<Coordinate, Goals> GOALS = new HashMap<Coordinate, Goals>();
 
 	public Coordinate newBox;
 
@@ -65,13 +65,12 @@ public class Node {
 	}
 
 	public boolean isGoalState() {
-		for (String key : GOALS.keySet()) {
-			String[] goalArray = key.split(",");
-			char g = GOALS.get(goalArray[0] + "," + goalArray[1]).getCharacter();
+		for (Coordinate coordinate : GOALS.keySet()) {
+			char g = GOALS.get(coordinate).getCharacter();
 			char b = 0;
 			
-			if (this.boxMap.get(new Coordinate(Integer.parseInt(goalArray[0]), Integer.parseInt(goalArray[1]))) != null) {
-				b = Character.toLowerCase(this.boxMap.get(new Coordinate(Integer.parseInt(goalArray[0]), Integer.parseInt(goalArray[1]))).getCharacter());
+			if (this.boxMap.get(coordinate) != null) {
+				b = Character.toLowerCase(this.boxMap.get(coordinate).getCharacter());
 			}
 			
 			if (g > 0 && b != g) {
@@ -156,15 +155,18 @@ public class Node {
 	}
 
 	public boolean cellIsFree(int row, int col) {
-		return !WALLS.contains(row + "," + col) && this.boxMap.get(new Coordinate(row, col)) == null;
+		Coordinate coordinate = new Coordinate(row, col);
+		return !WALLS.contains(coordinate) && this.boxMap.get(coordinate) == null;
 	}
 
     public boolean cellIsFreeAndNoGoalOrAgent(int row, int col) {
-        return  !WALLS.contains(row + "," + col) && this.boxMap.get(new Coordinate(row, col)) == null && !(agentRow == row && agentCol == col) && GOALS.get(row + "," + col) == null;
+		Coordinate coordinate = new Coordinate(row, col);
+        return  !WALLS.contains(coordinate) && this.boxMap.get(coordinate) == null && !(agentRow == row && agentCol == col) && GOALS.get(coordinate) == null;
     }
 
 	public boolean cellIsFreeOfGoalBoxAndAgent(int row, int col) {
-		return !(agentRow == row && agentCol == col) && this.boxMap.get(new Coordinate(row, col)) == null && GOALS.get(row + "," + col) == null;
+		Coordinate coordinate = new Coordinate(row, col);
+		return !(agentRow == row && agentCol == col) && this.boxMap.get(coordinate) == null && GOALS.get(coordinate) == null;
 	}
 
 	private boolean boxAt(int row, int col) {
@@ -222,15 +224,16 @@ public class Node {
 	public String toString() {
 		StringBuilder s = new StringBuilder();
 		for (int row = 0; row < MAX_ROW; row++) {
-			if (!WALLS.contains(row + "," + 0)) {
+			if (!WALLS.contains(new Coordinate(row, 0))) {
 					break;
 			}
 			for (int col = 0; col < MAX_COL; col++) {
-				if (this.boxMap.get(new Coordinate(row, col)) != null) {
-					s.append(this.boxMap.get(new Coordinate(row, col)).getCharacter());
-				} else if (GOALS.get(row + "," + col) != null) {
-					s.append(GOALS.get(row + "," + col).getCharacter());
-				} else if (WALLS.contains(row + "," + col)) {
+				Coordinate coordinate = new Coordinate(row, col);
+				if (this.boxMap.get(coordinate) != null) {
+					s.append(this.boxMap.get(coordinate).getCharacter());
+				} else if (GOALS.get(coordinate) != null) {
+					s.append(GOALS.get(coordinate).getCharacter());
+				} else if (WALLS.contains(coordinate)) {
 					s.append("+");
 				} else if (row == this.agentRow && col == this.agentCol) {
 					s.append("0");

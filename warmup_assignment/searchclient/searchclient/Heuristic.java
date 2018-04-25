@@ -14,15 +14,13 @@ public abstract class Heuristic implements Comparator<Node> {
 
 		int counter = 1;
 
-		for (Map.Entry<String, Goals> entry : Node.GOALS.entrySet()) {
+		for (Map.Entry<Coordinate, Goals> entry : Node.GOALS.entrySet()) {
 			int minLength = Integer.MAX_VALUE;
 			Box minBox = null;
 
-			String goalKey = entry.getKey();
 			Goals currentGoal = entry.getValue();
-			String[] goalArray = goalKey.split(",");
-			int goalRow = Integer.parseInt(goalArray[0]);
-			int goalCol = Integer.parseInt(goalArray[1]);
+			int goalRow = entry.getKey().getX();
+			int goalCol = entry.getKey().getY();
 
 			for (Coordinate boxKey : initialState.boxMap.keySet()) {
 				int boxRow = boxKey.getX();
@@ -58,10 +56,10 @@ public abstract class Heuristic implements Comparator<Node> {
 
 		if (n.action.actionType == Type.Move) {
 	
-			for (Coordinate key : n.boxMap.keySet()) {
-				int row = key.getX();
-				int col = key.getY();
-				Goals currentGoal = Node.GOALS.get(row + "," + col);
+			for (Coordinate coordinate : n.boxMap.keySet()) {
+				int row = coordinate.getX();
+				int col = coordinate.getY();
+				Goals currentGoal = Node.GOALS.get(coordinate);
 
 				// Find closest box
 				if (currentGoal == null) {
@@ -88,13 +86,11 @@ public abstract class Heuristic implements Comparator<Node> {
 		}
 		else if (n.action.actionType == Type.Push || n.action.actionType == Type.Pull) {
 	
-			for (Map.Entry<String, Goals> entry : Node.GOALS.entrySet()) {
-				String key = entry.getKey();
+			for (Map.Entry<Coordinate, Goals> entry : Node.GOALS.entrySet()) {
 				Goals currentGoal = entry.getValue();
 
-				String[] goalArray = key.split(",");
-				int goalRow = Integer.parseInt(goalArray[0]);
-				int goalCol = Integer.parseInt(goalArray[1]);
+				int goalRow = entry.getKey().getX();
+				int goalCol = entry.getKey().getY();
 				Box currentBox = n.boxMap.get(new Coordinate(goalRow, goalCol));
 
 				// Counts and sets finished state on goals

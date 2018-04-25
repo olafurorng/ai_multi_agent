@@ -62,9 +62,10 @@ public class SearchClient {
 		for (String serverMessageLine: lines) {
 			for (int col = 0; col < serverMessageLine.length(); col++) {
 				char chr = serverMessageLine.charAt(col);
+				Coordinate coordinate = new Coordinate(row, col);
 
 				if (chr == '+') { // Wall.
-					Node.WALLS.add(row + "," + col);
+					Node.WALLS.add(coordinate);
 				} else if ('0' <= chr && chr <= '9') { // Agent.
 					if (agentFound) {
 						System.err.println("Error, not a single agent level");
@@ -80,10 +81,10 @@ public class SearchClient {
                     }
 				} else if ('A' <= chr && chr <= 'Z') { // Box.
 					Box box = new Box(chr, 0);
-					this.initialState.boxMap.put(new Coordinate(row, col), box);
+					this.initialState.boxMap.put(coordinate, box);
 				} else if ('a' <= chr && chr <= 'z') { // Goal.
 					Goals goal = new Goals(chr, false, 0);
-					Node.GOALS.put(row + "," + col, goal);
+					Node.GOALS.put(coordinate, goal);
 				} else if (chr == ' ') {
 					// Free space.
 				} else {
@@ -119,20 +120,20 @@ public class SearchClient {
 
 		for (int i = 0; i < Node.MAX_ROW; i++) {
 			for (int j = 0; j < Node.MAX_COL; j++) {
-				if (Node.WALLS.contains(i + "," + j)) {
+				if (Node.WALLS.contains(new Coordinate(i, j))) {
 					break;
 				} else {
-					Node.WALLS.add(i + "," + j);
+					Node.WALLS.add(new Coordinate(i,j));
 				}
 			}
 		}
 		// then add from the right side
 		for (int i = 0; i < Node.MAX_ROW; i++) {
 			for (int j = Node.MAX_COL - 1; j >= 0 ; j--) {
-				if (Node.WALLS.contains(i + "," + j)) {
+				if (Node.WALLS.contains(new Coordinate(i,j))) {
 					break;
 				} else {
-					Node.WALLS.add(i + "," + j);
+					Node.WALLS.add(new Coordinate(i,j));
 				}
 			}
 		}
@@ -160,14 +161,14 @@ public class SearchClient {
 						if (topFree && topRightFree && rightFree && bottomRighFree && bottomFree && leftBottomFree && leftFree && leftTopFree) {
 							// now there is not goal, box or agent near this cell
 
-							boolean wallTop = Node.WALLS.contains((i-1) + "," + j);
-							boolean wallTopRight = Node.WALLS.contains((i-1) + "," + (j+1));
-							boolean wallRight = Node.WALLS.contains(i + "," + (j+1));
-							boolean wallBottomRight = Node.WALLS.contains((i + 1) + "," + (j+1));
-							boolean wallBottom = Node.WALLS.contains((i + 1) + "," + j);
-							boolean wallLeftBottom = Node.WALLS.contains((i + 1) + "," + (j - 1));
-							boolean wallLeft = Node.WALLS.contains(i + "," + (j - 1));
-							boolean wallLeftTop = Node.WALLS.contains((i-1) + "," + (j-1));
+							boolean wallTop = Node.WALLS.contains(new Coordinate(i-1, j));
+							boolean wallTopRight = Node.WALLS.contains(new Coordinate(i-1, j+1));
+							boolean wallRight = Node.WALLS.contains(new Coordinate(i, j+1));
+							boolean wallBottomRight = Node.WALLS.contains(new Coordinate(i + 1, j+1));
+							boolean wallBottom = Node.WALLS.contains(new Coordinate(i + 1, j));
+							boolean wallLeftBottom = Node.WALLS.contains(new Coordinate(i + 1, j - 1));
+							boolean wallLeft = Node.WALLS.contains(new Coordinate(i,j - 1));
+							boolean wallLeftTop = Node.WALLS.contains(new Coordinate(i-1, j-1));
 
 							/*
 								Wall is said to be touching a cell, if the wall is on the left, right, top or bottom.
@@ -180,11 +181,13 @@ public class SearchClient {
 							if (wallBottom) numberOfWallsTouching++;
 							if (wallLeft) numberOfWallsTouching++;
 
+							Coordinate coordinate = new Coordinate(i,j);
+
 
 							// 4 or 3 WALLS TOUCHING
 							if (numberOfWallsTouching == 4 || numberOfWallsTouching == 3) {
 								// we can safely add a wall
-								Node.WALLS.add(i + "," + j);
+								Node.WALLS.add(coordinate);
 								numberOfNewBoxesThisRound++;
 							}
 
@@ -196,25 +199,25 @@ public class SearchClient {
 
 								// WALLS are top and left
 								if (wallTop && wallLeft && !wallBottomRight) {
-									Node.WALLS.add(i + "," + j);
+									Node.WALLS.add(coordinate);
 									numberOfNewBoxesThisRound++;
 								}
 
 								// walls are top and right
 								if (wallTop && wallRight && !wallLeftBottom) {
-									Node.WALLS.add(i + "," + j);
+									Node.WALLS.add(coordinate);
 									numberOfNewBoxesThisRound++;
 								}
 
 								// walls are right and bottom
 								if (wallRight && wallBottom && !wallLeftTop) {
-									Node.WALLS.add(i + "," + j);
+									Node.WALLS.add(coordinate);
 									numberOfNewBoxesThisRound++;
 								}
 
 								// walls are bottom and left
 								if (wallBottom && wallLeft && !wallTopRight) {
-									Node.WALLS.add(i + "," + j);
+									Node.WALLS.add(coordinate);
 									numberOfNewBoxesThisRound++;
 								}
 							}
@@ -224,22 +227,22 @@ public class SearchClient {
 								// we exclude if the cell is part of a "tunnel", i.e.
 								// - if opposite nearby cell to the one touching wall, is a wall
 								if (wallTop && !wallBottomRight && !wallLeftBottom) {
-									Node.WALLS.add(i + "," + j);
+									Node.WALLS.add(coordinate);
 									numberOfNewBoxesThisRound++;
 								}
 
 								if (wallRight && !wallLeftTop && !wallLeftBottom) {
-									Node.WALLS.add(i + "," + j);
+									Node.WALLS.add(coordinate);
 									numberOfNewBoxesThisRound++;
 								}
 
 								if (wallBottom && !wallTopRight && !wallLeftTop) {
-									Node.WALLS.add(i + "," + j);
+									Node.WALLS.add(coordinate);
 									numberOfNewBoxesThisRound++;
 								}
 
 								if (wallLeft && !wallBottomRight && !wallTopRight) {
-									Node.WALLS.add(i + "," + j);
+									Node.WALLS.add(coordinate);
 									numberOfNewBoxesThisRound++;
 								}
 							}
