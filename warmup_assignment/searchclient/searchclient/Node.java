@@ -24,15 +24,6 @@ public class Node {
 	public int agentCol;
 	public static Color agentColor; // NOTE: nullable for SA levels
 
-	// Arrays are indexed from the top-left of the level, with first index being row and second being column.
-	// Row 0: (0,0) (0,1) (0,2) (0,3) ...
-	// Row 1: (1,0) (1,1) (1,2) (1,3) ...
-	// Row 2: (2,0) (2,1) (2,2) (2,3) ...
-	// ...
-	// (Start in the top left corner, first go down, then go right)
-	// E.g. this.WALLS[2] is an array of booleans having size MAX_COL.
-	// this.WALLS[row][col] is true if there's a wall at (row, col)
-	//
 
 	public static List<Coordinate> WALLS = new ArrayList<Coordinate>();
 	public Map<Coordinate, Box> boxMap = new HashMap<Coordinate, Box>();

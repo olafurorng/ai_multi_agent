@@ -289,13 +289,6 @@ public class SearchClient {
 					strategy.addToFrontier(n);
 				}
 			}
-			long afterUsedMem=(Runtime.getRuntime().totalMemory()-Runtime.getRuntime().freeMemory());
-
-			//System.err.println("Memory of expanded nodes: " + ((afterUsedMem / (1024 * 1024 * 1000.0)) - (beforeUsedMem / (1024 * 1024 * 1000.0))));
-			//BigDecimal test = new BigDecimal((afterUsedMem / (1024 * 1024 * 1000.0)) - (beforeUsedMem / (1024 * 1024 * 1000.0)));
-			//BigDecimal test2 = new BigDecimal((beforeUsedMem / (1024 * 1024 * 1000.0)));
-			//System.err.println("Memory of expanded nodes: " + test);
-			//System.err.println("Memory of expanded nodes: " + test2);
 		
 			iterations++;
 		}
