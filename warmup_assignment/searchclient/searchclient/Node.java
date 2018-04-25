@@ -1,11 +1,6 @@
 package searchclient;
 
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.LinkedList;
-import java.util.Random;
-import java.util.HashMap;
-import java.util.Map;
+import java.util.*;
 
 import searchclient.ColorHelper.*;
 import searchclient.Command.Type;
@@ -39,11 +34,11 @@ public class Node {
 	// this.WALLS[row][col] is true if there's a wall at (row, col)
 	//
 
-	public static HashMap<String, Boolean> WALLS = new HashMap<String, Boolean>();
-	public Map<String, Box> boxMap = new HashMap<String, Box>();
+	public static List<String> WALLS = new ArrayList<String>();
+	public Map<Coordinate, Box> boxMap = new HashMap<Coordinate, Box>();
 	public static HashMap<String, Goals> GOALS = new HashMap<String, Goals>();
 
-	public String newBox;
+	public Coordinate newBox;
 
 	public Node parent;
 	public Command action;
@@ -75,8 +70,8 @@ public class Node {
 			char g = GOALS.get(goalArray[0] + "," + goalArray[1]).getCharacter();
 			char b = 0;
 			
-			if (this.boxMap.get(goalArray[0] + "," + goalArray[1]) != null) {
-				b = Character.toLowerCase(this.boxMap.get(goalArray[0] + "," + goalArray[1]).getCharacter());
+			if (this.boxMap.get(new Coordinate(Integer.parseInt(goalArray[0]), Integer.parseInt(goalArray[1]))) != null) {
+				b = Character.toLowerCase(this.boxMap.get(new Coordinate(Integer.parseInt(goalArray[0]), Integer.parseInt(goalArray[1]))).getCharacter());
 			}
 			
 			if (g > 0 && b != g) {
@@ -95,8 +90,6 @@ public class Node {
 			int newAgentRow = this.agentRow + Command.dirToRowChange(c.dir1);
 			int newAgentCol = this.agentCol + Command.dirToColChange(c.dir1);
 
-			// System.err.println("Agent: " + newAgentCol + "," + newAgentRow);
-			// System.err.println("Boxes: " + boxMap);
 			if (c.actionType == Type.Move) {
 				// Check if there's a wall or box on the cell to which the agent is moving
 				if (this.cellIsFree(newAgentRow, newAgentCol)) {
@@ -119,21 +112,13 @@ public class Node {
 						n.agentRow = newAgentRow;
 						n.agentCol = newAgentCol;
 
-						//long start = System.nanoTime();
-						Box currentBox =  n.boxMap.get(newAgentRow + "," + newAgentCol);
-						//System.err.println("char: " + currentBox.getCharacter() + "pri: " + currentBox.getPriority() );
+						Box currentBox =  n.boxMap.get(new Coordinate(newAgentRow, newAgentCol));
 						
-						n.boxMap.remove(newAgentRow + "," + newAgentCol);
+						n.boxMap.remove(new Coordinate(newAgentRow, newAgentCol));
 						Box box = new Box(currentBox.getCharacter(), currentBox.getPriority());
 
-						n.boxMap.put(newBoxRow + "," + newBoxCol, box);
-						n.newBox = newBoxRow + "," + newBoxCol;
-						//System.err.println("Boxes: " + n.boxMap);
-						// System.err.println("Box Push: " + newBoxRow + "," + newBoxCol);
-
-						//long end = System.nanoTime();
-						//long microseconds = (end - start) / 1000;
-						//System.err.println("Timer: " + microseconds + " microseconds");
+						n.boxMap.put(new Coordinate(newBoxRow, newBoxCol), box);
+						n.newBox = new Coordinate(newBoxRow, newBoxCol);
 						
 						expandedNodes.add(n);
 					}
@@ -150,13 +135,13 @@ public class Node {
 						n.agentRow = newAgentRow;
 						n.agentCol = newAgentCol;
 
-						Box currentBox =  n.boxMap.get(boxRow + "," + boxCol);
-						n.boxMap.remove(boxRow + "," + boxCol);
+						Box currentBox =  n.boxMap.get(new Coordinate(boxRow, boxCol));
+						n.boxMap.remove(new Coordinate(boxRow, boxCol));
 						
 						Box box = new Box(currentBox.getCharacter(), currentBox.getPriority());
 						
-						n.boxMap.put(this.agentRow + "," + this.agentCol, box);
-						n.newBox = this.agentRow + "," + this.agentCol;
+						n.boxMap.put(new Coordinate(this.agentRow, this.agentCol), box);
+						n.newBox = new Coordinate(this.agentRow, this.agentCol);
 						// System.err.println("Box Pull: " + this.agentRow + "," + this.agentCol);
 
 						expandedNodes.add(n);
@@ -171,25 +156,25 @@ public class Node {
 	}
 
 	public boolean cellIsFree(int row, int col) {
-		return WALLS.get(row + "," + col) == null && this.boxMap.get(row + "," + col) == null;
+		return !WALLS.contains(row + "," + col) && this.boxMap.get(new Coordinate(row, col)) == null;
 	}
 
     public boolean cellIsFreeAndNoGoalOrAgent(int row, int col) {
-        return  WALLS.get(row + "," + col) == null && this.boxMap.get(row + "," + col) == null && !(agentRow == row && agentCol == col) && GOALS.get(row + "," + col) == null;
+        return  !WALLS.contains(row + "," + col) && this.boxMap.get(new Coordinate(row, col)) == null && !(agentRow == row && agentCol == col) && GOALS.get(row + "," + col) == null;
     }
 
 	public boolean cellIsFreeOfGoalBoxAndAgent(int row, int col) {
-		return !(agentRow == row && agentCol == col) && this.boxMap.get(row + "," + col) == null && GOALS.get(row + "," + col) == null;
+		return !(agentRow == row && agentCol == col) && this.boxMap.get(new Coordinate(row, col)) == null && GOALS.get(row + "," + col) == null;
 	}
 
 	private boolean boxAt(int row, int col) {
-		return this.boxMap.get(row + "," + col) != null;
+		return this.boxMap.get(new Coordinate(row, col)) != null;
 	}
 
 	private Node ChildNode() {
 		Node copy = new Node(this);
     
-		copy.boxMap = new HashMap<String,Box>(this.boxMap);
+		copy.boxMap = new HashMap<Coordinate,Box>(this.boxMap);
 
 		return copy;
 	}
@@ -237,15 +222,15 @@ public class Node {
 	public String toString() {
 		StringBuilder s = new StringBuilder();
 		for (int row = 0; row < MAX_ROW; row++) {
-			if (WALLS.get(row + "," + 0) == null) {
+			if (!WALLS.contains(row + "," + 0)) {
 					break;
 			}
 			for (int col = 0; col < MAX_COL; col++) {
-				if (this.boxMap.get(row + "," + col) != null) {
-					s.append(this.boxMap.get(row + "," + col).getCharacter());
+				if (this.boxMap.get(new Coordinate(row, col)) != null) {
+					s.append(this.boxMap.get(new Coordinate(row, col)).getCharacter());
 				} else if (GOALS.get(row + "," + col) != null) {
 					s.append(GOALS.get(row + "," + col).getCharacter());
-				} else if (WALLS.get(row + "," + col) != null) {
+				} else if (WALLS.contains(row + "," + col)) {
 					s.append("+");
 				} else if (row == this.agentRow && col == this.agentCol) {
 					s.append("0");

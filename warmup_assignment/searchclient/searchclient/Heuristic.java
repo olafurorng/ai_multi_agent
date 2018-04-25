@@ -24,11 +24,10 @@ public abstract class Heuristic implements Comparator<Node> {
 			int goalRow = Integer.parseInt(goalArray[0]);
 			int goalCol = Integer.parseInt(goalArray[1]);
 
-			for (String boxKey : initialState.boxMap.keySet()) {
-				String[] boxArray = boxKey.split(",");
-				int boxRow = Integer.parseInt(boxArray[0]);
-				int boxCol = Integer.parseInt(boxArray[1]);
-				Box currentBox = initialState.boxMap.get(boxRow + "," + boxCol);
+			for (Coordinate boxKey : initialState.boxMap.keySet()) {
+				int boxRow = boxKey.getX();
+				int boxCol = boxKey.getY();
+				Box currentBox = initialState.boxMap.get(new Coordinate(boxRow, boxCol));
 		
 				if (Character.toLowerCase(currentBox.getCharacter()) == currentGoal.getCharacter()) {
 					int width = Math.abs(goalCol - boxCol);
@@ -59,10 +58,9 @@ public abstract class Heuristic implements Comparator<Node> {
 
 		if (n.action.actionType == Type.Move) {
 	
-			for (String key : n.boxMap.keySet()) {
-				String[] boxArray = key.split(",");
-				int row = Integer.parseInt(boxArray[0]);
-				int col = Integer.parseInt(boxArray[1]);
+			for (Coordinate key : n.boxMap.keySet()) {
+				int row = key.getX();
+				int col = key.getY();
 				Goals currentGoal = Node.GOALS.get(row + "," + col);
 
 				// Find closest box
@@ -78,12 +76,12 @@ public abstract class Heuristic implements Comparator<Node> {
 				}
 
 				// Finished goals
-				else if (currentGoal != null && Character.toLowerCase(n.boxMap.get(row + "," + col).getCharacter()) == currentGoal.getCharacter()) {
+				else if (currentGoal != null && Character.toLowerCase(n.boxMap.get(new Coordinate(row, col)).getCharacter()) == currentGoal.getCharacter()) {
 					goalsFinished++;
 				} 
 				
 				// Priority
-				if (currentGoal != null && n.boxMap.get(row + "," + col).getPriority() != currentGoal.getPriority()) {
+				if (currentGoal != null && n.boxMap.get(new Coordinate(row, col)).getPriority() != currentGoal.getPriority()) {
 					notRightPriorities++;
 				}
 			}
@@ -97,7 +95,7 @@ public abstract class Heuristic implements Comparator<Node> {
 				String[] goalArray = key.split(",");
 				int goalRow = Integer.parseInt(goalArray[0]);
 				int goalCol = Integer.parseInt(goalArray[1]);
-				Box currentBox = n.boxMap.get(goalRow + "," + goalCol);
+				Box currentBox = n.boxMap.get(new Coordinate(goalRow, goalCol));
 
 				// Counts and sets finished state on goals
 				if (currentBox != null && Character.toLowerCase(currentBox.getCharacter()) == currentGoal.getCharacter()) {
@@ -135,9 +133,8 @@ public abstract class Heuristic implements Comparator<Node> {
 
 				// Priority to move to the right goal
 				if (currentBoxMoving.getPriority() == currentGoal.getPriority()) {
-					String[] movingBoxArray = n.newBox.split(",");
-					int movingBoxRow = Integer.parseInt(movingBoxArray[0]);
-					int movingBoxCol = Integer.parseInt(movingBoxArray[1]);
+					int movingBoxRow = n.newBox.getX();
+					int movingBoxCol = n.newBox.getY();
 
 					int width2 = Math.abs(movingBoxCol - goalCol);
 					int height2 = Math.abs(movingBoxRow - goalRow);
