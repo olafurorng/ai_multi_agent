@@ -1,18 +1,8 @@
 package searchclient;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.LinkedList;
-import java.util.Random;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Timer;
-import java.math.BigDecimal;
+import java.util.*;
 
 import searchclient.ColorHelper.*;
-import searchclient.Goals.*;
-import searchclient.Box.*;
 import searchclient.Command.Type;
 
 public class Node {
@@ -34,21 +24,12 @@ public class Node {
 	public int agentCol;
 	public static Color agentColor; // NOTE: nullable for SA levels
 
-	// Arrays are indexed from the top-left of the level, with first index being row and second being column.
-	// Row 0: (0,0) (0,1) (0,2) (0,3) ...
-	// Row 1: (1,0) (1,1) (1,2) (1,3) ...
-	// Row 2: (2,0) (2,1) (2,2) (2,3) ...
-	// ...
-	// (Start in the top left corner, first go down, then go right)
-	// E.g. this.walls[2] is an array of booleans having size MAX_COL.
-	// this.walls[row][col] is true if there's a wall at (row, col)
-	//
 
-	public static HashMap<String, Boolean> walls = new HashMap<String, Boolean>();
-	public HashMap<String, Box> boxMap = new HashMap<String, Box>();
-	public static HashMap<String, Goals> goals = new HashMap<String, Goals>();
+	public static List<Coordinate> WALLS = new ArrayList<Coordinate>();
+	public Map<Coordinate, Box> boxMap = new HashMap<Coordinate, Box>();
+	public static HashMap<Coordinate, Goals> GOALS = new HashMap<Coordinate, Goals>();
 
-	public String newBox;
+	public Coordinate newBox;
 
 	public Node parent;
 	public Command action;
@@ -75,13 +56,12 @@ public class Node {
 	}
 
 	public boolean isGoalState() {
-		for (String key : goals.keySet()) {
-			String[] goalArray = key.split(",");
-			char g = goals.get(goalArray[0] + "," + goalArray[1]).getCharacter();						
+		for (Coordinate coordinate : GOALS.keySet()) {
+			char g = GOALS.get(coordinate).getCharacter();
 			char b = 0;
 			
-			if (this.boxMap.get(goalArray[0] + "," + goalArray[1]) != null) {
-				b = Character.toLowerCase(this.boxMap.get(goalArray[0] + "," + goalArray[1]).getCharacter());
+			if (this.boxMap.get(coordinate) != null) {
+				b = Character.toLowerCase(this.boxMap.get(coordinate).getCharacter());
 			}
 			
 			if (g > 0 && b != g) {
@@ -100,8 +80,6 @@ public class Node {
 			int newAgentRow = this.agentRow + Command.dirToRowChange(c.dir1);
 			int newAgentCol = this.agentCol + Command.dirToColChange(c.dir1);
 
-			// System.err.println("Agent: " + newAgentCol + "," + newAgentRow);
-			// System.err.println("Boxes: " + boxMap);
 			if (c.actionType == Type.Move) {
 				// Check if there's a wall or box on the cell to which the agent is moving
 				if (this.cellIsFree(newAgentRow, newAgentCol)) {
@@ -124,21 +102,13 @@ public class Node {
 						n.agentRow = newAgentRow;
 						n.agentCol = newAgentCol;
 
-						//long start = System.nanoTime();
-						Box currentBox =  n.boxMap.get(newAgentRow + "," + newAgentCol);
-						//System.err.println("char: " + currentBox.getCharacter() + "pri: " + currentBox.getPriority() );
+						Box currentBox =  n.boxMap.get(new Coordinate(newAgentRow, newAgentCol));
 						
-						n.boxMap.remove(newAgentRow + "," + newAgentCol);
+						n.boxMap.remove(new Coordinate(newAgentRow, newAgentCol));
 						Box box = new Box(currentBox.getCharacter(), currentBox.getPriority());
 
-						n.boxMap.put(newBoxRow + "," + newBoxCol, box);
-						n.newBox = newBoxRow + "," + newBoxCol;
-						//System.err.println("Boxes: " + n.boxMap);
-						// System.err.println("Box Push: " + newBoxRow + "," + newBoxCol);
-
-						//long end = System.nanoTime();
-						//long microseconds = (end - start) / 1000;
-						//System.err.println("Timer: " + microseconds + " microseconds");
+						n.boxMap.put(new Coordinate(newBoxRow, newBoxCol), box);
+						n.newBox = new Coordinate(newBoxRow, newBoxCol);
 						
 						expandedNodes.add(n);
 					}
@@ -155,13 +125,13 @@ public class Node {
 						n.agentRow = newAgentRow;
 						n.agentCol = newAgentCol;
 
-						Box currentBox =  n.boxMap.get(boxRow + "," + boxCol);
-						n.boxMap.remove(boxRow + "," + boxCol);
+						Box currentBox =  n.boxMap.get(new Coordinate(boxRow, boxCol));
+						n.boxMap.remove(new Coordinate(boxRow, boxCol));
 						
 						Box box = new Box(currentBox.getCharacter(), currentBox.getPriority());
 						
-						n.boxMap.put(this.agentRow + "," + this.agentCol, box);
-						n.newBox = this.agentRow + "," + this.agentCol;
+						n.boxMap.put(new Coordinate(this.agentRow, this.agentCol), box);
+						n.newBox = new Coordinate(this.agentRow, this.agentCol);
 						// System.err.println("Box Pull: " + this.agentRow + "," + this.agentCol);
 
 						expandedNodes.add(n);
@@ -176,25 +146,28 @@ public class Node {
 	}
 
 	public boolean cellIsFree(int row, int col) {
-		return walls.get(row + "," + col) == null && this.boxMap.get(row + "," + col) == null;
+		Coordinate coordinate = new Coordinate(row, col);
+		return !WALLS.contains(coordinate) && this.boxMap.get(coordinate) == null;
 	}
 
     public boolean cellIsFreeAndNoGoalOrAgent(int row, int col) {
-        return  walls.get(row + "," + col) == null && this.boxMap.get(row + "," + col) == null && !(agentRow == row && agentCol == col) && goals.get(row + "," + col) == null;
+		Coordinate coordinate = new Coordinate(row, col);
+        return  !WALLS.contains(coordinate) && this.boxMap.get(coordinate) == null && !(agentRow == row && agentCol == col) && GOALS.get(coordinate) == null;
     }
 
 	public boolean cellIsFreeOfGoalBoxAndAgent(int row, int col) {
-		return !(agentRow == row && agentCol == col) && this.boxMap.get(row + "," + col) == null && goals.get(row + "," + col) == null;
+		Coordinate coordinate = new Coordinate(row, col);
+		return !(agentRow == row && agentCol == col) && this.boxMap.get(coordinate) == null && GOALS.get(coordinate) == null;
 	}
 
 	private boolean boxAt(int row, int col) {
-		return this.boxMap.get(row + "," + col) != null;
+		return this.boxMap.get(new Coordinate(row, col)) != null;
 	}
 
 	private Node ChildNode() {
 		Node copy = new Node(this);
     
-		copy.boxMap = new HashMap<String,Box>(this.boxMap);
+		copy.boxMap = new HashMap<Coordinate,Box>(this.boxMap);
 
 		return copy;
 	}
@@ -216,9 +189,7 @@ public class Node {
 			int result = 1;
 			result = prime * result + this.agentCol;
 			result = prime * result + this.agentRow;
-			result = prime * result + (this.boxMap != null ? this.boxMap.hashCode() : 0);
-			result = prime * result + (goals != null ? goals.hashCode() : 0);
-			result = prime * result + (walls != null ? walls.hashCode() : 0);
+			result = prime * result + this.boxMap.hashCode();
 			this._hash = result;
 		}
 		return this._hash;
@@ -235,7 +206,7 @@ public class Node {
 		Node other = (Node) obj;
 		if (this.agentRow != other.agentRow || this.agentCol != other.agentCol)
 			return false;
-		if (this.boxMap != null ? !this.boxMap.equals(other.boxMap) : other.boxMap != null) return false;
+		if (!this.boxMap.equals(other.boxMap)) return false;
 		return true;
 	}
 
@@ -244,15 +215,16 @@ public class Node {
 	public String toString() {
 		StringBuilder s = new StringBuilder();
 		for (int row = 0; row < MAX_ROW; row++) {
-			if (walls.get(row + "," + 0) == null) {
+			if (!WALLS.contains(new Coordinate(row, 0))) {
 					break;
 			}
 			for (int col = 0; col < MAX_COL; col++) {
-				if (this.boxMap.get(row + "," + col) != null) {
-					s.append(this.boxMap.get(row + "," + col).getCharacter());
-				} else if (goals.get(row + "," + col) != null) {
-					s.append(goals.get(row + "," + col).getCharacter());
-				} else if (walls.get(row + "," + col) != null) {
+				Coordinate coordinate = new Coordinate(row, col);
+				if (this.boxMap.get(coordinate) != null) {
+					s.append(this.boxMap.get(coordinate).getCharacter());
+				} else if (GOALS.get(coordinate) != null) {
+					s.append(GOALS.get(coordinate).getCharacter());
+				} else if (WALLS.contains(coordinate)) {
 					s.append("+");
 				} else if (row == this.agentRow && col == this.agentCol) {
 					s.append("0");

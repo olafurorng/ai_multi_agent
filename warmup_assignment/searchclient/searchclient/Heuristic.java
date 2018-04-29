@@ -1,39 +1,31 @@
 package searchclient;
 
 import java.util.Comparator;
-import java.util.ArrayList;
-import java.util.List;
 import searchclient.Command.Type;
-import java.util.HashMap;
+
 import java.util.Map;
-import searchclient.Goals.*;
-import searchclient.Box.*;
-import searchclient.NotImplementedException;
 
 public abstract class Heuristic implements Comparator<Node> {
 	int goalSize;
 
 	public Heuristic(Node initialState) {
 		// Here's a chance to pre-process the static parts of the level.
-		goalSize = Node.goals.size();
+		goalSize = Node.GOALS.size();
 
 		int counter = 1;
 
-		for (Map.Entry<String, Goals> entry : Node.goals.entrySet()) {
+		for (Map.Entry<Coordinate, Goals> entry : Node.GOALS.entrySet()) {
 			int minLength = Integer.MAX_VALUE;
 			Box minBox = null;
 
-			String goalKey = entry.getKey();
 			Goals currentGoal = entry.getValue();
-			String[] goalArray = goalKey.split(",");
-			int goalRow = Integer.parseInt(goalArray[0]);
-			int goalCol = Integer.parseInt(goalArray[1]);
+			int goalRow = entry.getKey().getX();
+			int goalCol = entry.getKey().getY();
 
-			for (String boxKey : initialState.boxMap.keySet()) {
-				String[] boxArray = boxKey.split(",");
-				int boxRow = Integer.parseInt(boxArray[0]);
-				int boxCol = Integer.parseInt(boxArray[1]);
-				Box currentBox = initialState.boxMap.get(boxRow + "," + boxCol);
+			for (Coordinate boxKey : initialState.boxMap.keySet()) {
+				int boxRow = boxKey.getX();
+				int boxCol = boxKey.getY();
+				Box currentBox = initialState.boxMap.get(new Coordinate(boxRow, boxCol));
 		
 				if (Character.toLowerCase(currentBox.getCharacter()) == currentGoal.getCharacter()) {
 					int width = Math.abs(goalCol - boxCol);
@@ -64,11 +56,10 @@ public abstract class Heuristic implements Comparator<Node> {
 
 		if (n.action.actionType == Type.Move) {
 	
-			for (String key : n.boxMap.keySet()) {
-				String[] boxArray = key.split(",");
-				int row = Integer.parseInt(boxArray[0]);
-				int col = Integer.parseInt(boxArray[1]);
-				Goals currentGoal = Node.goals.get(row + "," + col);
+			for (Coordinate coordinate : n.boxMap.keySet()) {
+				int row = coordinate.getX();
+				int col = coordinate.getY();
+				Goals currentGoal = Node.GOALS.get(coordinate);
 
 				// Find closest box
 				if (currentGoal == null) {
@@ -83,26 +74,24 @@ public abstract class Heuristic implements Comparator<Node> {
 				}
 
 				// Finished goals
-				else if (currentGoal != null && Character.toLowerCase(n.boxMap.get(row + "," + col).getCharacter()) == currentGoal.getCharacter()) {
+				else if (currentGoal != null && Character.toLowerCase(n.boxMap.get(new Coordinate(row, col)).getCharacter()) == currentGoal.getCharacter()) {
 					goalsFinished++;
 				} 
 				
 				// Priority
-				if (currentGoal != null && n.boxMap.get(row + "," + col).getPriority() != currentGoal.getPriority()) {
+				if (currentGoal != null && n.boxMap.get(new Coordinate(row, col)).getPriority() != currentGoal.getPriority()) {
 					notRightPriorities++;
 				}
 			}
 		}
 		else if (n.action.actionType == Type.Push || n.action.actionType == Type.Pull) {
 	
-			for (Map.Entry<String, Goals> entry : Node.goals.entrySet()) {
-				String key = entry.getKey();
+			for (Map.Entry<Coordinate, Goals> entry : Node.GOALS.entrySet()) {
 				Goals currentGoal = entry.getValue();
 
-				String[] goalArray = key.split(",");
-				int goalRow = Integer.parseInt(goalArray[0]);
-				int goalCol = Integer.parseInt(goalArray[1]);
-				Box currentBox = n.boxMap.get(goalRow + "," + goalCol);
+				int goalRow = entry.getKey().getX();
+				int goalCol = entry.getKey().getY();
+				Box currentBox = n.boxMap.get(new Coordinate(goalRow, goalCol));
 
 				// Counts and sets finished state on goals
 				if (currentBox != null && Character.toLowerCase(currentBox.getCharacter()) == currentGoal.getCharacter()) {
@@ -140,9 +129,8 @@ public abstract class Heuristic implements Comparator<Node> {
 
 				// Priority to move to the right goal
 				if (currentBoxMoving.getPriority() == currentGoal.getPriority()) {
-					String[] movingBoxArray = n.newBox.split(",");
-					int movingBoxRow = Integer.parseInt(movingBoxArray[0]);
-					int movingBoxCol = Integer.parseInt(movingBoxArray[1]);
+					int movingBoxRow = n.newBox.getX();
+					int movingBoxCol = n.newBox.getY();
 
 					int width2 = Math.abs(movingBoxCol - goalCol);
 					int height2 = Math.abs(movingBoxRow - goalRow);
