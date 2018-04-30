@@ -137,7 +137,7 @@ public abstract class Heuristic implements Comparator<Node> {
 			minLength = 0;
 		}
 		
-		int heuristicValue = goalsLeft*100000 + priority + notRightAssigned*10000 + minLength * 100 + assignedDistance + closestBox * 1000;
+		int heuristicValue = goalsLeft*100000 + notRightAssigned*10000 + minLength * 100 + assignedDistance + closestBox * 1000;
 		//System.err.println("heuristic: " + heuristicValue);
 		return heuristicValue;
 	}
