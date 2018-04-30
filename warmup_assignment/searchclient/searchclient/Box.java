@@ -4,11 +4,11 @@ import java.lang.*;
 
 public class Box {
     private char character;
-    private int priority;
+    private int assign;
 
-    public Box(char character, int priority) {
+    public Box(char character, int assign) {
         this.character = character;
-        this.priority = priority;
+        this.assign = assign;
     }
 
     public char getCharacter() {
@@ -19,12 +19,12 @@ public class Box {
         this.character = character;
     }
 
-    public int getPriority() {
-        return priority;
+    public int getAssign() {
+        return assign;
     }
 
-    public void setPriority(int priority) {
-        this.priority = priority;
+    public void setAssign(int assign) {
+        this.assign = assign;
     }
 
     @Override
@@ -35,13 +35,13 @@ public class Box {
         Box box = (Box) o;
 
         if (character != box.character) return false;
-        return priority == box.priority;
+        return assign == box.assign;
     }
 
     @Override
     public int hashCode() {
         int result = (int) character;
-        result = 31 * result + priority;
+        result = 31 * result + assign;
         return result;
     }
 }

@@ -126,10 +126,10 @@ public class Node {
 
 						//long start = System.nanoTime();
 						Box currentBox =  n.boxMap.get(newAgentRow + "," + newAgentCol);
-						//System.err.println("char: " + currentBox.getCharacter() + "pri: " + currentBox.getPriority() );
+						//System.err.println("char: " + currentBox.getCharacter() + "pri: " + currentBox.getAssign() );
 						
 						n.boxMap.remove(newAgentRow + "," + newAgentCol);
-						Box box = new Box(currentBox.getCharacter(), currentBox.getPriority());
+						Box box = new Box(currentBox.getCharacter(), currentBox.getAssign());
 
 						n.boxMap.put(newBoxRow + "," + newBoxCol, box);
 						n.newBox = newBoxRow + "," + newBoxCol;
@@ -158,7 +158,7 @@ public class Node {
 						Box currentBox =  n.boxMap.get(boxRow + "," + boxCol);
 						n.boxMap.remove(boxRow + "," + boxCol);
 						
-						Box box = new Box(currentBox.getCharacter(), currentBox.getPriority());
+						Box box = new Box(currentBox.getCharacter(), currentBox.getAssign());
 						
 						n.boxMap.put(this.agentRow + "," + this.agentCol, box);
 						n.newBox = this.agentRow + "," + this.agentCol;
