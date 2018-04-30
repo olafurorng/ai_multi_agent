@@ -8,10 +8,6 @@ import java.util.*;
 import searchclient.Strategy.*;
 import searchclient.Heuristic.*;
 import searchclient.ColorHelper.*;
-import searchclient.Goals.*;
-import searchclient.Box.*;
-
-import java.math.BigDecimal;
 
 public class SearchClient {
 	public Node initialState;
@@ -66,9 +62,10 @@ public class SearchClient {
 		for (String serverMessageLine: lines) {
 			for (int col = 0; col < serverMessageLine.length(); col++) {
 				char chr = serverMessageLine.charAt(col);
+				Coordinate coordinate = new Coordinate(row, col);
 
 				if (chr == '+') { // Wall.
-					this.initialState.walls.put(row + "," + col, true);
+					Node.WALLS.add(coordinate);
 				} else if ('0' <= chr && chr <= '9') { // Agent.
 					if (agentFound) {
 						System.err.println("Error, not a single agent level");
@@ -84,10 +81,10 @@ public class SearchClient {
                     }
 				} else if ('A' <= chr && chr <= 'Z') { // Box.
 					Box box = new Box(chr, 0);
-					this.initialState.boxMap.put(row + "," + col, box);
+					this.initialState.boxMap.put(coordinate, box);
 				} else if ('a' <= chr && chr <= 'z') { // Goal.
 					Goals goal = new Goals(chr, false, 0);
-					this.initialState.goals.put(row + "," + col, goal);
+					Node.GOALS.put(coordinate, goal);
 				} else if (chr == ' ') {
 					// Free space.
 				} else {
@@ -123,20 +120,20 @@ public class SearchClient {
 
 		for (int i = 0; i < Node.MAX_ROW; i++) {
 			for (int j = 0; j < Node.MAX_COL; j++) {
-				if (Node.walls.get(i + "," + j) != null) {
+				if (Node.WALLS.contains(new Coordinate(i, j))) {
 					break;
 				} else {
-					Node.walls.put(i + "," + j, true);
+					Node.WALLS.add(new Coordinate(i,j));
 				}
 			}
 		}
 		// then add from the right side
 		for (int i = 0; i < Node.MAX_ROW; i++) {
 			for (int j = Node.MAX_COL - 1; j >= 0 ; j--) {
-				if (Node.walls.get(i + "," + j) != null) {
+				if (Node.WALLS.contains(new Coordinate(i,j))) {
 					break;
 				} else {
-					Node.walls.put(i + "," + j, true);
+					Node.WALLS.add(new Coordinate(i,j));
 				}
 			}
 		}
@@ -164,14 +161,14 @@ public class SearchClient {
 						if (topFree && topRightFree && rightFree && bottomRighFree && bottomFree && leftBottomFree && leftFree && leftTopFree) {
 							// now there is not goal, box or agent near this cell
 
-							boolean wallTop = Node.walls.get((i-1) + "," + j) != null;
-							boolean wallTopRight = Node.walls.get((i-1) + "," + (j+1)) != null;
-							boolean wallRight = Node.walls.get(i + "," + (j+1)) != null;
-							boolean wallBottomRight = Node.walls.get((i + 1) + "," + (j+1)) != null;
-							boolean wallBottom = Node.walls.get((i + 1) + "," + j) != null;
-							boolean wallLeftBottom = Node.walls.get((i + 1) + "," + (j - 1)) != null;
-							boolean wallLeft = Node.walls.get(i + "," + (j - 1)) != null;
-							boolean wallLeftTop = Node.walls.get((i-1) + "," + (j-1)) != null;
+							boolean wallTop = Node.WALLS.contains(new Coordinate(i-1, j));
+							boolean wallTopRight = Node.WALLS.contains(new Coordinate(i-1, j+1));
+							boolean wallRight = Node.WALLS.contains(new Coordinate(i, j+1));
+							boolean wallBottomRight = Node.WALLS.contains(new Coordinate(i + 1, j+1));
+							boolean wallBottom = Node.WALLS.contains(new Coordinate(i + 1, j));
+							boolean wallLeftBottom = Node.WALLS.contains(new Coordinate(i + 1, j - 1));
+							boolean wallLeft = Node.WALLS.contains(new Coordinate(i,j - 1));
+							boolean wallLeftTop = Node.WALLS.contains(new Coordinate(i-1, j-1));
 
 							/*
 								Wall is said to be touching a cell, if the wall is on the left, right, top or bottom.
@@ -184,11 +181,13 @@ public class SearchClient {
 							if (wallBottom) numberOfWallsTouching++;
 							if (wallLeft) numberOfWallsTouching++;
 
+							Coordinate coordinate = new Coordinate(i,j);
+
 
 							// 4 or 3 WALLS TOUCHING
 							if (numberOfWallsTouching == 4 || numberOfWallsTouching == 3) {
 								// we can safely add a wall
-								Node.walls.put(i + "," + j, true);
+								Node.WALLS.add(coordinate);
 								numberOfNewBoxesThisRound++;
 							}
 
@@ -198,27 +197,27 @@ public class SearchClient {
 								// - if the touching walls are opposite, i.e. walltop and wallbottom or wallright and wallleft
 								// - if the opposite nearby cell to the two touching walls, is a wall
 
-								// walls are top and left
+								// WALLS are top and left
 								if (wallTop && wallLeft && !wallBottomRight) {
-									Node.walls.put(i + "," + j, true);
+									Node.WALLS.add(coordinate);
 									numberOfNewBoxesThisRound++;
 								}
 
 								// walls are top and right
 								if (wallTop && wallRight && !wallLeftBottom) {
-									Node.walls.put(i + "," + j, true);
+									Node.WALLS.add(coordinate);
 									numberOfNewBoxesThisRound++;
 								}
 
 								// walls are right and bottom
 								if (wallRight && wallBottom && !wallLeftTop) {
-									Node.walls.put(i + "," + j, true);
+									Node.WALLS.add(coordinate);
 									numberOfNewBoxesThisRound++;
 								}
 
 								// walls are bottom and left
 								if (wallBottom && wallLeft && !wallTopRight) {
-									Node.walls.put(i + "," + j, true);
+									Node.WALLS.add(coordinate);
 									numberOfNewBoxesThisRound++;
 								}
 							}
@@ -228,22 +227,22 @@ public class SearchClient {
 								// we exclude if the cell is part of a "tunnel", i.e.
 								// - if opposite nearby cell to the one touching wall, is a wall
 								if (wallTop && !wallBottomRight && !wallLeftBottom) {
-									Node.walls.put(i + "," + j, true);
+									Node.WALLS.add(coordinate);
 									numberOfNewBoxesThisRound++;
 								}
 
 								if (wallRight && !wallLeftTop && !wallLeftBottom) {
-									Node.walls.put(i + "," + j, true);
+									Node.WALLS.add(coordinate);
 									numberOfNewBoxesThisRound++;
 								}
 
 								if (wallBottom && !wallTopRight && !wallLeftTop) {
-									Node.walls.put(i + "," + j, true);
+									Node.WALLS.add(coordinate);
 									numberOfNewBoxesThisRound++;
 								}
 
 								if (wallLeft && !wallBottomRight && !wallTopRight) {
-									Node.walls.put(i + "," + j, true);
+									Node.WALLS.add(coordinate);
 									numberOfNewBoxesThisRound++;
 								}
 							}
@@ -277,14 +276,12 @@ public class SearchClient {
             if (iterations == 10000) {
 				System.err.println(strategy.searchStatus());
 				int counter = 0;
-				for (Map.Entry<String, Goals> entry : Node.goals.entrySet()) {
-					String key = entry.getKey();
+				for (Map.Entry<Coordinate, Goals> entry : Node.GOALS.entrySet()) {
 					Goals currentGoal = entry.getValue();
-	
-					String[] goalArray = key.split(",");
-					int goalRow = Integer.parseInt(goalArray[0]);
-					int goalCol = Integer.parseInt(goalArray[1]);
-					Box currentBox = leafNode.boxMap.get(goalRow + "," + goalCol);
+					int goalRow = entry.getKey().getX();
+					int goalCol = entry.getKey().getY();
+
+					Box currentBox = leafNode.boxMap.get(new Coordinate(goalRow, goalCol));
 	
 					// If goal is not finished
 					if ((currentBox == null) || (currentBox != null && Character.toLowerCase(currentBox.getCharacter()) != currentGoal.getCharacter())) {
@@ -293,11 +290,11 @@ public class SearchClient {
 						//currentGoal.setPriority(currentGoal.getPriority() + 1);
 						//System.err.println("pri goals: " + currentGoal.getPriority());
 					}
-					System.err.println("current goal: " + currentGoal.getCharacter() + ": " + currentGoal.getPriority());
+					//System.err.println("current goal: " + currentGoal.getCharacter() + ": " + currentGoal.getPriority());
 
 				}
 				System.err.println("Unfinish goals: " + counter);
-				System.err.println(leafNode.toString());
+				//System.err.println(leafNode.toString());
 				iterations = 0;
 			}
 
