@@ -248,10 +248,10 @@ public class WallBuilder {
                         boolean goalBottom = Node.GOALS.containsKey(new Coordinate(i + 1, j));
                         boolean goalLeft = Node.GOALS.containsKey(new Coordinate(i,j - 1));
 
-							/*
-								Wall is said to be touching a cell, if the wall is on the left, right, top or bottom.
-								Wall is said to be nearby a cell, if the wall is on the top-right, right-bottom, bottom-left or left-top
-							 */
+                        /*
+                            Wall is said to be touching a cell, if the wall is on the left, right, top or bottom.
+                            Wall is said to be nearby a cell, if the wall is on the top-right, right-bottom, bottom-left or left-top
+                         */
                         int numberOfWallsTouching = 0;
                         int numberOfGoalTouching = 0;
 
