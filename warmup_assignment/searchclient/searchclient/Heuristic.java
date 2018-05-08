@@ -50,19 +50,19 @@ public abstract class Heuristic implements Comparator<Node> {
 
 		// iterate over the goals which are unfinished and find the shortest goal
 		// and calculate the length (the heurastic function) to the goal
-		int minLength = Integer.MAX_VALUE;
-		for (int i = 0; i < goalsFinished.size(); i++) {
-			if (!goalsFinished.get(i)) {
-				int width = Math.abs(n.agentCol - goalCol.get(i));
-				int height = Math.abs(n.agentRow - goalRow.get(i));
-
-				int length = width + height;
-				if (length < minLength) {
-					minLength = length;
-				}
-			}
-		}
-		return countGoalsNotFinished*100 + minLength;
+//		int minLength = Integer.MAX_VALUE;
+//		for (int i = 0; i < goalsFinished.size(); i++) {
+//			if (!goalsFinished.get(i)) {
+//				int width = Math.abs(n.agentCol - goalCol.get(i));
+//				int height = Math.abs(n.agentRow - goalRow.get(i));
+//
+//				int length = width + height;
+//				if (length < minLength) {
+//					minLength = length;
+//				}
+//			}
+//		}
+		return countGoalsNotFinished; //*100 + minLength;
 	}
 
 	public abstract int f(Node n);
