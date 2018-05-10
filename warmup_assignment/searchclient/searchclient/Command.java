@@ -24,7 +24,7 @@ public class Command {
 		}
 		for (Dir d1 : Dir.values()) {
 			for (Dir d2 : Dir.values()) {
-				if (d1 != d2) {
+				if (d1 != d2 && !Command.isOpposite(d1, d2)) {
 					cmds.add(new Command(Type.Pull, d1, d2));
 				}
 			}
