@@ -151,11 +151,11 @@ public class Node {
 		return this.boxMap.get(coordinate) == null && GOALS.get(coordinate) == null;
 	}
 
-	private boolean boxAt(int row, int col) {
+	public boolean boxAt(int row, int col) {
 		return this.boxMap.get(new Coordinate(row, col)) != null;
 	}
 
-	private Node ChildNode(Node parentNode, Node nodeBefore) {
+	public Node ChildNode(Node parentNode, Node nodeBefore) {
 		Node copy = new Node(parentNode);
     
 		copy.boxMap = new HashMap<Coordinate,Box>(this.boxMap);
@@ -241,8 +241,6 @@ public class Node {
 			}
 			s.append("\n");
 		}
-		s.append("(" + actions[0] + "," + actions[1] + ")");
-		s.append("\n");
 		s.append("ID: " + System.identityHashCode(this));
 		return s.toString();
 	}

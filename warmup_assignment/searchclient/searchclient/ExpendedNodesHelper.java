@@ -41,8 +41,13 @@ public class ExpendedNodesHelper {
                         n.agentsRow[agentIndex] = newAgentRow;
                         n.agentsCol[agentIndex] = newAgentCol;
 
-                        n.boxes[newBoxRow][newBoxCol] = nodeBefore.boxes[newAgentRow][newAgentCol];
-                        n.boxes[newAgentRow][newAgentCol] = 0;
+                        Box currentBox =  n.boxMap.get(new Coordinate(newAgentRow, newAgentCol));
+
+                        n.boxMap.remove(new Coordinate(newAgentRow, newAgentCol));
+                        Box box = new Box(currentBox.getCharacter(), currentBox.getAssign());
+
+                        n.boxMap.put(new Coordinate(newBoxRow, newBoxCol), box);
+                        n.newBox = new Coordinate(newBoxRow, newBoxCol);
 
                         expandedNodes.add(n);
                     }
@@ -59,8 +64,13 @@ public class ExpendedNodesHelper {
                         n.agentsRow[agentIndex] = newAgentRow;
                         n.agentsCol[agentIndex] = newAgentCol;
 
-                        n.boxes[nodeBefore.agentsRow[agentIndex]][nodeBefore.agentsCol[agentIndex]] = nodeBefore.boxes[boxRow][boxCol];
-                        n.boxes[boxRow][boxCol] = 0;
+                        Box currentBox =  n.boxMap.get(new Coordinate(boxRow, boxCol));
+                        n.boxMap.remove(new Coordinate(boxRow, boxCol));
+
+                        Box box = new Box(currentBox.getCharacter(), currentBox.getAssign());
+
+                        n.boxMap.put(new Coordinate(nodeBefore.agentsRow[agentIndex], nodeBefore.agentsCol[agentIndex]), box);
+                        n.newBox = new Coordinate(nodeBefore.agentsRow[agentIndex], nodeBefore.agentsCol[agentIndex]);
 
                         expandedNodes.add(n);
                     }

@@ -188,7 +188,14 @@ public class SearchClient {
                     strategy = new StrategyDFS();
                     break;
                 case "-astar":
-                    strategy = new StrategyBestFirst(new AStar(client.initialState));
+                	if (Node.NUMBER_OF_AGENTS == 1) {
+                		// single agent
+						strategy = new StrategyBestFirst(new AStarSA(client.initialState));
+					} else {
+                		// multi agent
+						strategy = new StrategyBestFirst(new AStarMA(client.initialState));
+					}
+
                     break;
                 case "-wastar":
                     // You're welcome to test WA* out with different values, but for the report you must at least indicate benchmarks for W = 5.

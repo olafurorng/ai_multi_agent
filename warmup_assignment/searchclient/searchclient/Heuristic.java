@@ -50,8 +50,8 @@ public abstract class Heuristic implements Comparator<Node> {
 		int closestBox = Integer.MAX_VALUE;
 		int minLength = Integer.MAX_VALUE;
 
-		if (n.action.actionType == Type.Move) {
-	
+		if (n.actions[0].actionType == Type.Move) {
+
 			for (Coordinate coordinate : n.boxMap.keySet()) {
 				int row = coordinate.getX();
 				int col = coordinate.getY();
@@ -59,26 +59,26 @@ public abstract class Heuristic implements Comparator<Node> {
 
 				// Find closest box that is not in the right goal
 				if ((currentGoal == null) || (currentGoal != null && Character.toLowerCase(n.boxMap.get(new Coordinate(row, col)).getCharacter()) != currentGoal.getCharacter())) {
-					int width = Math.abs(n.agentCol - col);
-					int height = Math.abs(n.agentRow - row);
+					int width = Math.abs(n.agentsCol[0] - col);
+					int height = Math.abs(n.agentsRow[0] - row);
 
 					int length = width + height;
-				
+
 					if (length < closestBox ) {
-						closestBox = length;	
-					}	
+						closestBox = length;
+					}
 
 					goalsLeft++;
 				}
-		
+
 				// Priority
 				if ((currentGoal == null) || (currentGoal != null && n.boxMap.get(new Coordinate(row, col)).getAssign() != currentGoal.getAssign())) {
 					notRightAssigned++;
 				}
 			}
 		}
-		else if (n.action.actionType == Type.Push || n.action.actionType == Type.Pull) {
-	
+		else if (n.actions[0].actionType == Type.Push || n.actions[0].actionType == Type.Pull) {
+
 			for (Map.Entry<Coordinate, Goals> entry : Node.GOALS.entrySet()) {
 				Goals currentGoal = entry.getValue();
 
@@ -88,17 +88,17 @@ public abstract class Heuristic implements Comparator<Node> {
 
 				// Counts and sets finished state on goals
 				if (currentBox != null && Character.toLowerCase(currentBox.getCharacter()) == currentGoal.getCharacter()) {
-					currentGoal.setState(true);					
+					currentGoal.setState(true);
 				} else {
-					currentGoal.setState(false);	
-					goalsLeft++;		
-				}	
+					currentGoal.setState(false);
+					goalsLeft++;
+				}
 
 				Box currentBoxMoving = n.boxMap.get(n.newBox);
 
 				if (!currentGoal.getState()) {
-					int width = Math.abs(n.agentCol - goalCol);
-					int height = Math.abs(n.agentRow - goalRow);
+					int width = Math.abs(n.agentsCol[0] - goalCol);
+					int height = Math.abs(n.agentsRow[0] - goalRow);
 
 					int length = width + height;
 
@@ -107,7 +107,7 @@ public abstract class Heuristic implements Comparator<Node> {
 						if (length < minLength) {
 							minLength = length;
 						}
-					}						
+					}
 				}
 
 				// Right box in right goal priority
@@ -129,14 +129,14 @@ public abstract class Heuristic implements Comparator<Node> {
 			}
 
 		}
-	
+
 		if (closestBox == Integer.MAX_VALUE) {
 			closestBox = 0;
 		}
 		if (minLength == Integer.MAX_VALUE) {
 			minLength = 0;
 		}
-		
+
 		int heuristicValue = goalsLeft*100000 + notRightAssigned*10000 + minLength * 100 + assignedDistance + closestBox * 1000;
 		//System.err.println("heuristic: " + heuristicValue);
 		return heuristicValue;
@@ -149,8 +149,8 @@ public abstract class Heuristic implements Comparator<Node> {
 		return this.f(n1) - this.f(n2);
 	}
 
-	public static class AStar extends Heuristic {
-		public AStar(Node initialState) {
+	public static class AStarSA extends Heuristic {
+		public AStarSA(Node initialState) {
 			super(initialState);
 		}
 
@@ -163,7 +163,7 @@ public abstract class Heuristic implements Comparator<Node> {
 
 		@Override
 		public String toString() {
-			return "A* evaluation";
+			return "A* evaluation ofr Single Agent";
 		}
 	}
 
