@@ -56,8 +56,12 @@ public class SearchClient {
 
 		// Creating the initial state Node (Previous existing code)
 		int row = 0;
-		boolean agentFound = false;
 		this.initialState = new Node(null);
+
+		List<Integer> agentsRow = new ArrayList<Integer>();
+		List<Integer> agentsCol = new ArrayList<Integer>();
+		List<Integer> agentNumber = new ArrayList<Integer>();
+		List<Color> agentsColor = new ArrayList<Color>();
 
 		for (String serverMessageLine: lines) {
 			for (int col = 0; col < serverMessageLine.length(); col++) {
@@ -67,18 +71,15 @@ public class SearchClient {
 				if (chr == '+') { // Wall.
 					Node.WALLS.add(coordinate);
 				} else if ('0' <= chr && chr <= '9') { // Agent.
-					if (agentFound) {
-						System.err.println("Error, not a single agent level");
-						System.err.println("Also remember to pass in different agent colors when we implement this");
-						System.exit(1);
+					agentsRow.add(row);
+					agentsCol.add(col);
+					agentNumber.add(Integer.parseInt(String.valueOf(chr)));
+					String colorAsString = colorsMap.get(chr);
+					if (colorAsString == null) {
+						colorAsString = "blue"; // defaulting to blue if not defined
 					}
-					agentFound = true;
-					this.initialState.agentRow = row;
-					this.initialState.agentCol = col;
-					if (colorsMap.size() > 0) { // colors are defined in this level
-                        Color agentColor = ColorHelper.getColorFromString(colorsMap.get('0')); // FIXME: CHANGE THIS WHEN WE ADD MORE AGENTS
-                        Node.agentColor = agentColor;
-                    }
+					Color agentColor = ColorHelper.getColorFromString(colorAsString);
+					agentsColor.add(agentColor);
 				} else if ('A' <= chr && chr <= 'Z') { // Box.
 					Box box = new Box(chr, 0);
 					this.initialState.boxMap.put(coordinate, box);
@@ -94,6 +95,18 @@ public class SearchClient {
 			}
 
 			row++;
+		}
+
+		Node.setNumberOfAgents(agentsCol.size());
+		initialState.initializeActionsForInitialState();
+
+		initialState.agentsRow = new int[agentsRow.size()];
+		initialState.agentsCol = new int[agentsCol.size()];
+		Node.agentsColor = new Color[agentsColor.size()];
+		for (int i = 0; i < agentsRow.size(); i++) {
+			initialState.agentsRow[agentNumber.get(i)] = agentsRow.get(i);
+			initialState.agentsCol[agentNumber.get(i)] = agentsCol.get(i);
+			Node.agentsColor[agentNumber.get(i)] = agentsColor.get(i);
 		}
 
 		// Lets relax the problem by adding edges / walls
@@ -211,7 +224,17 @@ public class SearchClient {
 			System.err.println(strategy.searchStatus());
 
 			for (Node n : solution) {
-				String act = n.action.toString();
+
+				String act = "[";
+
+				for (int i = 0; i < Node.NUMBER_OF_AGENTS; i++) {
+					act += n.actions[i];
+					if (i != Node.NUMBER_OF_AGENTS - 1) {// if this is not the last command
+						act += ",";
+					}
+				}
+				act += "]";
+
 				System.out.println(act);
 				String response = serverMessages.readLine();
 				if (response.contains("false")) {
