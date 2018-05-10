@@ -6,7 +6,10 @@ import searchclient.ColorHelper.*;
 import searchclient.Command.Type;
 
 public class Node {
+
 	private static final Random RND = new Random(1);
+	private static final ExpendedNodesHelper EXPENDED_NODES_HELPER = new ExpendedNodesHelper();
+
 
 	/**
 	 * This method should be called once, in the beginning when we have loaded
@@ -17,12 +20,20 @@ public class Node {
 		MAX_COL = numberOfCol;
 	}
 
+	public static void setNumberOfAgents(final int numberOfAgents) {
+		NUMBER_OF_AGENTS = numberOfAgents;
+	}
+
 	public static int MAX_ROW;
 	public static int MAX_COL;
+	public static int NUMBER_OF_AGENTS;
 
-	public int agentRow;
-	public int agentCol;
-	public static Color agentColor; // NOTE: nullable for SA levels
+	public int[] agentsRow = new int[NUMBER_OF_AGENTS];
+	public int[] agentsCol = new int[NUMBER_OF_AGENTS];
+	public static Color[] agentsColor;
+	//public int agentRow;
+	//public int agentCol;
+	//public static Color agentColor; // NOTE: nullable for SA levels
 
 
 	public static List<Coordinate> WALLS = new ArrayList<Coordinate>();
@@ -32,19 +43,28 @@ public class Node {
 	public Coordinate newBox;
 
 	public Node parent;
-	public Command action;
+	public Command[] actions = new Command[NUMBER_OF_AGENTS];
 
 	private int g;
 	
 	private int _hash = 0;
 
 	public Node(Node parent) {
+		Command noOpAction = new Command();
+		Arrays.fill(actions, noOpAction);
+
 		this.parent = parent;
 		if (parent == null) {
 			this.g = 0;
 		} else {
 			this.g = parent.g() + 1;
 		}
+	}
+
+	public void initializeActionsForInitialState() {
+		actions = new Command[NUMBER_OF_AGENTS];
+		Command noOpAction = new Command();
+		Arrays.fill(actions, noOpAction);
 	}
 
 	public int g() {
@@ -73,101 +93,78 @@ public class Node {
 	}
 
 	public ArrayList<Node> getExpandedNodes() {
-	
-		ArrayList<Node> expandedNodes = new ArrayList<Node>(Command.EVERY.length);
-		for (Command c : Command.EVERY) {
-			// Determine applicability of action
-			int newAgentRow = this.agentRow + Command.dirToRowChange(c.dir1);
-			int newAgentCol = this.agentCol + Command.dirToColChange(c.dir1);
+		ArrayList<Node> allExpendedNodes = new ArrayList<Node>();
+		allExpendedNodes.addAll(EXPENDED_NODES_HELPER.getExpandedNodes(this, this, 0));
 
-			if (c.actionType == Type.Move) {
-				// Check if there's a wall or box on the cell to which the agent is moving
-				if (this.cellIsFree(newAgentRow, newAgentCol)) {
-					Node n = this.ChildNode();
-					n.action = c;
-					n.agentRow = newAgentRow;
-					n.agentCol = newAgentCol;
-			
-					expandedNodes.add(n);
+		for (int i = 1; i < NUMBER_OF_AGENTS; i++) { // we start from one as we have already expanded nodes for the first agent
+			if (NUMBER_OF_AGENTS >= i+1) {
+				ArrayList<Node> tempNewNodes = new ArrayList<Node>();
+				for (Node n : allExpendedNodes) {
+					tempNewNodes.addAll(EXPENDED_NODES_HELPER.getExpandedNodes(this, n, i));
 				}
-			} else if (c.actionType == Type.Push) {
-				// Make sure that there's actually a box to move
-				if (this.boxAt(newAgentRow, newAgentCol)) {
-					int newBoxRow = newAgentRow + Command.dirToRowChange(c.dir2);
-					int newBoxCol = newAgentCol + Command.dirToColChange(c.dir2);
-					// .. and that new cell of box is free
-					if (this.cellIsFree(newBoxRow, newBoxCol)) {
-						Node n = this.ChildNode();
-						n.action = c;
-						n.agentRow = newAgentRow;
-						n.agentCol = newAgentCol;
-
-						Box currentBox =  n.boxMap.get(new Coordinate(newAgentRow, newAgentCol));
-						
-						n.boxMap.remove(new Coordinate(newAgentRow, newAgentCol));
-						Box box = new Box(currentBox.getCharacter(), currentBox.getAssign());
-
-						n.boxMap.put(new Coordinate(newBoxRow, newBoxCol), box);
-						n.newBox = new Coordinate(newBoxRow, newBoxCol);
-						
-						expandedNodes.add(n);
-					}
-				}
-			} else if (c.actionType == Type.Pull) {
-				// Cell is free where agent is going
-				if (this.cellIsFree(newAgentRow, newAgentCol)) {
-					int boxRow = this.agentRow + Command.dirToRowChange(c.dir2);
-					int boxCol = this.agentCol + Command.dirToColChange(c.dir2);
-					// .. and there's a box in "dir2" of the agent
-					if (this.boxAt(boxRow, boxCol)) {
-						Node n = this.ChildNode();
-						n.action = c;
-						n.agentRow = newAgentRow;
-						n.agentCol = newAgentCol;
-
-						Box currentBox =  n.boxMap.get(new Coordinate(boxRow, boxCol));
-						n.boxMap.remove(new Coordinate(boxRow, boxCol));
-						
-						Box box = new Box(currentBox.getCharacter(), currentBox.getAssign());
-						
-						n.boxMap.put(new Coordinate(this.agentRow, this.agentCol), box);
-						n.newBox = new Coordinate(this.agentRow, this.agentCol);
-						// System.err.println("Box Pull: " + this.agentRow + "," + this.agentCol);
-
-						expandedNodes.add(n);
-					}
-				}
+				allExpendedNodes.addAll(tempNewNodes);
+				allExpendedNodes.addAll(EXPENDED_NODES_HELPER.getExpandedNodes(this, this, i));
 			}
 		}
-						
-		Collections.shuffle(expandedNodes, RND);
-			
-		return expandedNodes;
+
+		Collections.shuffle(allExpendedNodes, RND);
+		return allExpendedNodes;
 	}
 
 	public boolean cellIsFree(int row, int col) {
+		for (int i = 0; i < NUMBER_OF_AGENTS; i++) {
+			if (agentsCol[i] == col && agentsRow[i] == row) {
+				return false;
+			}
+		}
+
 		Coordinate coordinate = new Coordinate(row, col);
 		return !WALLS.contains(coordinate) && this.boxMap.get(coordinate) == null;
 	}
 
+	/**
+	 * Used in beginning when we fill the level with walls
+	 */
     public boolean cellIsFreeAndNoGoalOrAgent(int row, int col) {
+		for (int i = 0; i < NUMBER_OF_AGENTS; i++) {
+			if (agentsCol[i] == col && agentsRow[i] == row) {
+				return false;
+			}
+		}
+
 		Coordinate coordinate = new Coordinate(row, col);
-        return  !WALLS.contains(coordinate) && this.boxMap.get(coordinate) == null && !(agentRow == row && agentCol == col) && GOALS.get(coordinate) == null;
+        return  !WALLS.contains(coordinate) && this.boxMap.get(coordinate) == null && GOALS.get(coordinate) == null;
+
     }
 
+	/**
+	 * Used in beginning when we fill the level with walls
+	 */
 	public boolean cellIsFreeOfGoalBoxAndAgent(int row, int col) {
+		for (int i = 0; i < NUMBER_OF_AGENTS; i++) {
+			if (agentsCol[i] == col && agentsRow[i] == row) {
+				return false;
+			}
+		}
+
 		Coordinate coordinate = new Coordinate(row, col);
-		return !(agentRow == row && agentCol == col) && this.boxMap.get(coordinate) == null && GOALS.get(coordinate) == null;
+		return this.boxMap.get(coordinate) == null && GOALS.get(coordinate) == null;
 	}
 
-	private boolean boxAt(int row, int col) {
+	public boolean boxAt(int row, int col) {
 		return this.boxMap.get(new Coordinate(row, col)) != null;
 	}
 
-	private Node ChildNode() {
-		Node copy = new Node(this);
+	public Node ChildNode(Node parentNode, Node nodeBefore) {
+		Node copy = new Node(parentNode);
     
 		copy.boxMap = new HashMap<Coordinate,Box>(this.boxMap);
+
+		System.arraycopy(this.agentsRow, 0, copy.agentsRow, 0, NUMBER_OF_AGENTS);
+		System.arraycopy(this.agentsCol, 0, copy.agentsCol, 0, NUMBER_OF_AGENTS);
+		if (nodeBefore != parentNode) {
+			System.arraycopy(this.actions, 0, copy.actions, 0, NUMBER_OF_AGENTS);
+		}
 
 		return copy;
 	}
@@ -187,8 +184,8 @@ public class Node {
 		if (this._hash == 0) {
 			final int prime = 31;
 			int result = 1;
-			result = prime * result + this.agentCol;
-			result = prime * result + this.agentRow;
+			result = prime * result + Arrays.hashCode(this.agentsRow);
+			result = prime * result + Arrays.hashCode(this.agentsCol);
 			result = prime * result + this.boxMap.hashCode();
 			this._hash = result;
 		}
@@ -204,7 +201,7 @@ public class Node {
 		if (this.getClass() != obj.getClass())
 			return false;
 		Node other = (Node) obj;
-		if (this.agentRow != other.agentRow || this.agentCol != other.agentCol)
+		if (!(Arrays.equals(this.agentsRow, other.agentsRow) && Arrays.equals(this.agentsCol, other.agentsCol)))
 			return false;
 		if (!this.boxMap.equals(other.boxMap)) return false;
 		return true;
@@ -214,6 +211,7 @@ public class Node {
 	@Override
 	public String toString() {
 		StringBuilder s = new StringBuilder();
+		s.append("\n");
 		for (int row = 0; row < MAX_ROW; row++) {
 			if (!WALLS.contains(new Coordinate(row, 0))) {
 					break;
@@ -226,14 +224,24 @@ public class Node {
 					s.append(GOALS.get(coordinate).getCharacter());
 				} else if (WALLS.contains(coordinate)) {
 					s.append("+");
-				} else if (row == this.agentRow && col == this.agentCol) {
-					s.append("0");
 				} else {
-					s.append(" ");
+					boolean agentThere = false;
+					for (int agentIndex = 0; agentIndex < NUMBER_OF_AGENTS; agentIndex++){
+						if (agentsRow[agentIndex] == row && agentsCol[agentIndex] == col) {
+							s.append(String.valueOf(agentIndex));
+							agentThere = true;
+							break;
+						}
+					}
+
+					if (!agentThere) {
+						s.append(" ");
+					}
 				}
 			}
 			s.append("\n");
 		}
+		s.append("ID: " + System.identityHashCode(this));
 		return s.toString();
 	}
 
