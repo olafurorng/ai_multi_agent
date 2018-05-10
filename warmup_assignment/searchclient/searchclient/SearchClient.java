@@ -128,14 +128,10 @@ public class SearchClient {
 					// If goal is not finished
 					if ((currentBox == null) || (currentBox != null && Character.toLowerCase(currentBox.getCharacter()) != currentGoal.getCharacter())) {
 						counter++;
-						//currentGoal.setPriority(currentGoal.getPriority() + 1);
-						//currentGoal.setPriority(currentGoal.getPriority() + 1);
-						//System.err.println("pri goals: " + currentGoal.getPriority());
 					}
-					//System.err.println("current goal: " + currentGoal.getCharacter() + ": " + currentGoal.getPriority());
 
 				}
-				System.err.println("Unfinish goals: " + counter);
+				System.err.println("Unfinished goals: " + counter);
 				//System.err.println(leafNode.toString());
 				iterations = 0;
 			}

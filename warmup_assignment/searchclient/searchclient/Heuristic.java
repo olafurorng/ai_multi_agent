@@ -71,7 +71,7 @@ public abstract class Heuristic implements Comparator<Node> {
 					goalsLeft++;
 				}
 		
-				// Priority
+				// Assigning
 				if ((currentGoal == null) || (currentGoal != null && n.boxMap.get(new Coordinate(row, col)).getAssign() != currentGoal.getAssign())) {
 					notRightAssigned++;
 				}
@@ -110,12 +110,12 @@ public abstract class Heuristic implements Comparator<Node> {
 					}						
 				}
 
-				// Right box in right goal priority
+				// Right box in right goal assigning
 				if ((currentBox == null) || (currentBox != null && currentBox.getAssign() != currentGoal.getAssign())) {
 					notRightAssigned++;
 				}
 
-				// Priority to move to the right goal
+				// Assigning to move to the right goal
 
 				if (currentBoxMoving.getAssign() == currentGoal.getAssign()) {
 					int movingBoxRow = n.newBox.getX();
