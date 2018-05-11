@@ -23,7 +23,7 @@ public class ExpendedNodesHelper {
 
             if (c.actionType == Command.Type.Move) {
                 // Check if there's a wall or box on the cell to which the agent is moving
-                if (nodeBefore.cellIsFree(newAgentRow, newAgentCol)) {
+                if (nodeBefore.cellIsFree(newAgentRow, newAgentCol) && parentNode.cellIsFree(newAgentRow, newAgentCol)) { // we have to check if both the nodeBefore and the parentNode has free cell
                     Node n = nodeBefore.ChildNode(parentNode, nodeBefore);
                     n.actions[agentIndex] = c;
                     n.agentsRow[agentIndex] = newAgentRow;
@@ -37,7 +37,7 @@ public class ExpendedNodesHelper {
                     int newBoxRow = newAgentRow + Command.dirToRowChange(c.dir2);
                     int newBoxCol = newAgentCol + Command.dirToColChange(c.dir2);
                     // .. and that new cell of box is free
-                    if (nodeBefore.cellIsFree(newBoxRow, newBoxCol)) {
+                    if (nodeBefore.cellIsFree(newBoxRow, newBoxCol) && parentNode.cellIsFree(newBoxRow, newBoxCol)) { // we have to check if both the nodeBefore and the parentNode has free cell
                         Node n = nodeBefore.ChildNode(parentNode, nodeBefore);
                         n.actions[agentIndex] = c;
                         n.agentsRow[agentIndex] = newAgentRow;
@@ -57,7 +57,7 @@ public class ExpendedNodesHelper {
                 }
             } else if (c.actionType == Command.Type.Pull) {
                 // Cell is free where agent is going
-                if (nodeBefore.cellIsFree(newAgentRow, newAgentCol)) {
+                if (nodeBefore.cellIsFree(newAgentRow, newAgentCol) && parentNode.cellIsFree(newAgentRow, newAgentCol)) { // we have to check if both the nodeBefore and the parentNode has free cell
                     int boxRow = nodeBefore.agentsRow[agentIndex] + Command.dirToRowChange(c.dir2);
                     int boxCol = nodeBefore.agentsCol[agentIndex] + Command.dirToColChange(c.dir2);
                     // .. and there's a box in "dir2" of the agent
