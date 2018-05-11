@@ -31,9 +31,6 @@ public class Node {
 	public int[] agentsRow = new int[NUMBER_OF_AGENTS];
 	public int[] agentsCol = new int[NUMBER_OF_AGENTS];
 	public static Color[] agentsColor;
-	//public int agentRow;
-	//public int agentCol;
-	//public static Color agentColor; // NOTE: nullable for SA levels
 
 
 	public static List<Coordinate> WALLS = new ArrayList<Coordinate>();
