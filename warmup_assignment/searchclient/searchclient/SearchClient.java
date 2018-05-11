@@ -58,7 +58,7 @@ public class SearchClient {
 
 		// Creating the initial state Node (Previous existing code)
 		int row = 0;
-		this.initialState = new Node(null);
+		this.initialState = new Node(null, true);
 
 		List<Integer> agentsRow = new ArrayList<Integer>();
 		List<Integer> agentsCol = new ArrayList<Integer>();

@@ -46,7 +46,7 @@ public class Node {
 	
 	private int _hash = 0;
 
-	public Node(Node parent) {
+	public Node(Node parent, boolean shouldIncreaseG) {
 		Command noOpAction = new Command();
 		Arrays.fill(actions, noOpAction);
 
@@ -54,7 +54,11 @@ public class Node {
 		if (parent == null) {
 			this.g = 0;
 		} else {
-			this.g = parent.g() + 1;
+			if (shouldIncreaseG) {
+				this.g = parent.g() + 1;
+			} else {
+				this.g = parent.g();
+			}
 		}
 	}
 
@@ -153,13 +157,14 @@ public class Node {
 	}
 
 	public Node ChildNode(Node parentNode, Node nodeBefore) {
-		Node copy = new Node(parentNode);
+		boolean shouldIncreaseG = parentNode.equals(nodeBefore);
+		Node copy = new Node(parentNode, shouldIncreaseG);
     
 		copy.boxMap = new HashMap<Coordinate,Box>(this.boxMap);
 	
 		System.arraycopy(this.agentsRow, 0, copy.agentsRow, 0, NUMBER_OF_AGENTS);
 		System.arraycopy(this.agentsCol, 0, copy.agentsCol, 0, NUMBER_OF_AGENTS);
-		if (nodeBefore != parentNode) {
+		if (!nodeBefore.equals(parentNode)) {
 			copy.newBox = new HashMap<String,Coordinate>(this.newBox);
 			System.arraycopy(this.actions, 0, copy.actions, 0, NUMBER_OF_AGENTS);
 		}
