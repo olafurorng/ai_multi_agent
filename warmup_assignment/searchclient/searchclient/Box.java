@@ -5,10 +5,18 @@ import java.lang.*;
 public class Box {
     private char character;
     private int assign;
+    private final ColorHelper.Color color;
 
     public Box(char character, int assign) {
         this.character = character;
         this.assign = assign;
+        String colorAsString = SearchClient.colorsMap.get(character);
+        if (colorAsString != null) {
+            color = ColorHelper.getColorFromString(colorAsString);
+        } else {
+            color = ColorHelper.Color.BLUE;
+        }
+
     }
 
     public char getCharacter() {
@@ -27,6 +35,10 @@ public class Box {
         this.assign = assign;
     }
 
+    public ColorHelper.Color getColor() {
+        return color;
+    }
+
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
@@ -35,13 +47,15 @@ public class Box {
         Box box = (Box) o;
 
         if (character != box.character) return false;
-        return assign == box.assign;
+        if (assign != box.assign) return false;
+        return color == box.color;
     }
 
     @Override
     public int hashCode() {
         int result = (int) character;
         result = 31 * result + assign;
+        result = 31 * result + (color != null ? color.hashCode() : 0);
         return result;
     }
 }

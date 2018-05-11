@@ -2,6 +2,7 @@ package searchclient;
 
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.Map;
 import java.util.Random;
 /**
  * Created by olafurorn on 4/16/18.
@@ -31,7 +32,8 @@ public class ExpendedNodesHelper {
                 }
             } else if (c.actionType == Command.Type.Push) {
                 // Make sure that there's actually a box to move
-                if (nodeBefore.boxAt(newAgentRow, newAgentCol)) {
+                if (nodeBefore.boxAt(newAgentRow, newAgentCol)
+                        && Node.agentsColor[agentIndex] == nodeBefore.boxMap.get(new Coordinate(newAgentRow, newAgentCol)).getColor()) { // checking if the box and the agent has the same colors
                     int newBoxRow = newAgentRow + Command.dirToRowChange(c.dir2);
                     int newBoxCol = newAgentCol + Command.dirToColChange(c.dir2);
                     // .. and that new cell of box is free
@@ -58,7 +60,8 @@ public class ExpendedNodesHelper {
                     int boxRow = nodeBefore.agentsRow[agentIndex] + Command.dirToRowChange(c.dir2);
                     int boxCol = nodeBefore.agentsCol[agentIndex] + Command.dirToColChange(c.dir2);
                     // .. and there's a box in "dir2" of the agent
-                    if (nodeBefore.boxAt(boxRow, boxCol)) {
+                    if (nodeBefore.boxAt(boxRow, boxCol)
+                            && Node.agentsColor[agentIndex] == nodeBefore.boxMap.get(new Coordinate(boxRow, boxCol)).getColor()) { // checking if the box and the agent has the same colors
                         Node n = nodeBefore.ChildNode(parentNode, nodeBefore);
                         n.actions[agentIndex] = c;
                         n.agentsRow[agentIndex] = newAgentRow;

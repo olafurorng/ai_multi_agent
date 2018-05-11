@@ -12,10 +12,12 @@ import searchclient.ColorHelper.*;
 public class SearchClient {
 	public Node initialState;
 
+	public static HashMap<Character, String> colorsMap;
+
 	public SearchClient(BufferedReader serverMessages) throws Exception {
 		// Read lines specifying colors
 		String line = serverMessages.readLine();
-        HashMap<Character, String> colorsMap = new HashMap<Character, String>();
+        colorsMap = new HashMap<Character, String>();
 		while (line.matches("^[a-z]+:\\s*[0-9A-Z](\\s*,\\s*[0-9A-Z])*\\s*$")) {
             String[] colorParts = line.split("\\:");
             String color = colorParts[0];
