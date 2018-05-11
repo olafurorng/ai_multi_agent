@@ -1,5 +1,7 @@
 package searchclient;
 
+import java.util.Map;
+
 /**
  * Created by olafurorn on 5/10/18.
  */
@@ -11,7 +13,14 @@ public class AStarMA extends Heuristic {
 
     @Override
     public int h(Node n) {
-        return 1;
+
+        int totalHeuristicValue = 0;
+
+        for (int i = 0; i < Node.NUMBER_OF_AGENTS; i++) { 
+            totalHeuristicValue += hPerAgent(n, i);
+        }
+
+        return totalHeuristicValue;
     }
 
     @Override

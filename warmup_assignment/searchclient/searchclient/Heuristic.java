@@ -44,7 +44,11 @@ public abstract class Heuristic implements Comparator<Node> {
 	}
 
 	public int h(Node n) {
-	
+		return hPerAgent(n, 0); // index zero as it is for single agent
+	}
+
+	public int hPerAgent(Node n, int agentIndex) {
+
 		int goalsLeft = 0;
 		int notRightAssigned = 0;
 		int assignedDistance = 0;
@@ -52,7 +56,7 @@ public abstract class Heuristic implements Comparator<Node> {
 		//int priority = 0;
 		//int closestBoxPriority = 0;
 
-		if (n.actions[0].actionType == Type.Move) {
+		if (n.actions[agentIndex].actionType == Type.Move) {
 	
 			/*int assignedGoalPriority = 0;
 			for (Map.Entry<Coordinate, Goals> entry : Node.GOALS.entrySet()) {
@@ -77,8 +81,8 @@ public abstract class Heuristic implements Comparator<Node> {
 				int length = 0;
 
 				if ((currentGoal == null) || (currentGoal != null && Character.toLowerCase(currentBox.getCharacter()) != currentGoal.getCharacter())) {
-					int width = Math.abs(n.agentsCol[0] - col);
-					int height = Math.abs(n.agentsRow[0] - row);
+					int width = Math.abs(n.agentsCol[agentIndex] - col);
+					int height = Math.abs(n.agentsRow[agentIndex] - row);
 
 					length = width + height;
 
@@ -105,7 +109,7 @@ public abstract class Heuristic implements Comparator<Node> {
 			// So moving is almost always worse then pushing and moving a box not in the right goal
 			minLength += 100;
 		}
-		else if (n.actions[0].actionType == Type.Push || n.actions[0].actionType == Type.Pull) {
+		else if (n.actions[agentIndex].actionType == Type.Push || n.actions[agentIndex].actionType == Type.Pull) {
 
 			for (Map.Entry<Coordinate, Goals> entry : Node.GOALS.entrySet()) {
 				Goals currentGoal = entry.getValue();
@@ -123,18 +127,18 @@ public abstract class Heuristic implements Comparator<Node> {
 					//currentGoal.setFinished(currentGoal.getFinished() + 1);		
 				}	
 
-				Box currentBoxMoving = n.boxMap.get(n.newBox);
+				Box currentBoxMoving = n.boxMap.get(n.newBox.get(Integer.toString(agentIndex)));
 
 				int length = 0;
 
 				if (!currentGoal.getState()) {
-					int width = Math.abs(n.agentsCol[0] - goalCol);
-					int height = Math.abs(n.agentsRow[0] - goalRow);
+					int width = Math.abs(n.agentsCol[agentIndex] - goalCol);
+					int height = Math.abs(n.agentsRow[agentIndex] - goalRow);
 
 					length = width + height;
 
 					// Better to move to the right goal character
-					if (Character.toLowerCase(currentBoxMoving.getCharacter()) == currentGoal.getCharacter()) {
+					if (currentBoxMoving != null && Character.toLowerCase(currentBoxMoving.getCharacter()) == currentGoal.getCharacter()) {
 						if (length < minLength) {
 							minLength = length;
 						}
@@ -147,10 +151,9 @@ public abstract class Heuristic implements Comparator<Node> {
 				}
 
 				// Priority to move to the right goal
-
-				if (currentBoxMoving.getAssign() == currentGoal.getAssign()) {
-					int movingBoxRow = n.newBox.getX();
-					int movingBoxCol = n.newBox.getY();
+				if (currentBoxMoving != null && currentBoxMoving.getAssign() == currentGoal.getAssign()) {
+					int movingBoxRow = n.newBox.get(Integer.toString(agentIndex)).getX();
+					int movingBoxCol = n.newBox.get(Integer.toString(agentIndex)).getY();
 
 					int width = Math.abs(movingBoxCol - goalCol);
 					int height = Math.abs(movingBoxRow - goalRow);
@@ -177,6 +180,10 @@ public abstract class Heuristic implements Comparator<Node> {
 
 		if (minLength == Integer.MAX_VALUE) {
 			minLength = 0;
+		}
+
+		if (n.actions[agentIndex].actionType == Type.NoOp) {
+			heuristicValue = 10000000;
 		}
 
 		int heuristicValue = goalsLeft*100 + (notRightAssigned*50 + assignedDistance) + minLength;

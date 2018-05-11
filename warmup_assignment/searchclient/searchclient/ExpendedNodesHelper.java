@@ -47,7 +47,7 @@ public class ExpendedNodesHelper {
                         Box box = new Box(currentBox.getCharacter(), currentBox.getAssign());
 
                         n.boxMap.put(new Coordinate(newBoxRow, newBoxCol), box);
-                        n.newBox = new Coordinate(newBoxRow, newBoxCol);
+                        n.newBox.put(Integer.toString(agentIndex), new Coordinate(newBoxRow, newBoxCol));
 
                         expandedNodes.add(n);
                     }
@@ -70,7 +70,7 @@ public class ExpendedNodesHelper {
                         Box box = new Box(currentBox.getCharacter(), currentBox.getAssign());
 
                         n.boxMap.put(new Coordinate(nodeBefore.agentsRow[agentIndex], nodeBefore.agentsCol[agentIndex]), box);
-                        n.newBox = new Coordinate(nodeBefore.agentsRow[agentIndex], nodeBefore.agentsCol[agentIndex]);
+                        n.newBox.put(Integer.toString(agentIndex), new Coordinate(nodeBefore.agentsRow[agentIndex], nodeBefore.agentsCol[agentIndex]));
 
                         expandedNodes.add(n);
                     }
