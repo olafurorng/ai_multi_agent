@@ -11,6 +11,7 @@ public abstract class Heuristic implements Comparator<Node> {
 		// Here's a chance to pre-process the static parts of the level.
 		int counter = 1;
 
+		// Assign goal to a box
 		for (Map.Entry<Coordinate, Goals> entry : Node.GOALS.entrySet()) {
 			int minLength = Integer.MAX_VALUE;
 			Box minBox = null;
@@ -47,9 +48,8 @@ public abstract class Heuristic implements Comparator<Node> {
 		int goalsLeft = 0;
 		int notRightAssigned = 0;
 		int assignedDistance = 0;
-		int priority = 0;
-		int closestBox = Integer.MAX_VALUE;
 		int minLength = Integer.MAX_VALUE;
+		//int priority = 0;
 		//int closestBoxPriority = 0;
 
 		if (n.actions[0].actionType == Type.Move) {
@@ -82,8 +82,8 @@ public abstract class Heuristic implements Comparator<Node> {
 
 					length = width + height;
 
-					if (length < closestBox ) {
-						closestBox = length;
+					if (length < minLength ) {
+						minLength = length;
 					}
 
 					goalsLeft++;
@@ -95,12 +95,15 @@ public abstract class Heuristic implements Comparator<Node> {
 				}
 
 				/*if (currentBox.getAssign() == assignedGoalPriority ) {
-					closestBox = length;	
+					minLength = length;	
 					goalsLeft = 1;
 					notRightAssigned = 0;
 					break;
 				}*/
 			}
+			
+			// So moving is almost always worse then pushing and moving a box not in the right goal
+			minLength += 100;
 		}
 		else if (n.actions[0].actionType == Type.Push || n.actions[0].actionType == Type.Pull) {
 
@@ -149,10 +152,10 @@ public abstract class Heuristic implements Comparator<Node> {
 					int movingBoxRow = n.newBox.getX();
 					int movingBoxCol = n.newBox.getY();
 
-					int width2 = Math.abs(movingBoxCol - goalCol);
-					int height2 = Math.abs(movingBoxRow - goalRow);
+					int width = Math.abs(movingBoxCol - goalCol);
+					int height = Math.abs(movingBoxRow - goalRow);
 
-					assignedDistance = (width2 + height2) * 10;
+					assignedDistance = width + height;
 				}
 
 				/*if (currentGoal.getPriority() == 100) {
@@ -172,14 +175,11 @@ public abstract class Heuristic implements Comparator<Node> {
 
 		}
 
-		if (closestBox == Integer.MAX_VALUE) {
-			closestBox = 0;
-		}
 		if (minLength == Integer.MAX_VALUE) {
 			minLength = 0;
 		}
 
-		int heuristicValue = goalsLeft*100000 + priority + notRightAssigned*10000 + minLength * 100 + assignedDistance + closestBox * 1000;
+		int heuristicValue = goalsLeft*100 + (notRightAssigned*50 + assignedDistance) + minLength;
 
 		//System.err.println("heuristic: " + heuristicValue);
 		return heuristicValue;
