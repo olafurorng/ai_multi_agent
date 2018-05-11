@@ -156,10 +156,11 @@ public class Node {
 		Node copy = new Node(parentNode);
     
 		copy.boxMap = new HashMap<Coordinate,Box>(this.boxMap);
-
+	
 		System.arraycopy(this.agentsRow, 0, copy.agentsRow, 0, NUMBER_OF_AGENTS);
 		System.arraycopy(this.agentsCol, 0, copy.agentsCol, 0, NUMBER_OF_AGENTS);
 		if (nodeBefore != parentNode) {
+			copy.newBox = new HashMap<String,Coordinate>(this.newBox);
 			System.arraycopy(this.actions, 0, copy.actions, 0, NUMBER_OF_AGENTS);
 		}
 

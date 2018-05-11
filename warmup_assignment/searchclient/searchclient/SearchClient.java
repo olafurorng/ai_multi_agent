@@ -129,7 +129,7 @@ public class SearchClient {
 			}
 
 			Node leafNode = strategy.getAndRemoveLeaf();
-
+			System.err.println(leafNode.toString());
             if (iterations == 10000) {
 				System.err.println(strategy.searchStatus());
 				int counter = 0;

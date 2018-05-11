@@ -80,7 +80,8 @@ public abstract class Heuristic implements Comparator<Node> {
 				// Find closest box that is not in the right goal
 				int length = 0;
 
-				if ((currentGoal == null) || (currentGoal != null && Character.toLowerCase(currentBox.getCharacter()) != currentGoal.getCharacter())) {
+				if ((currentGoal == null) || (currentGoal != null && Character.toLowerCase(currentBox.getCharacter()) != currentGoal.getCharacter()) &&
+					currentBox.getColor() == Node.agentsColor[agentIndex]) {
 					int width = Math.abs(n.agentsCol[agentIndex] - col);
 					int height = Math.abs(n.agentsRow[agentIndex] - row);
 
@@ -128,7 +129,7 @@ public abstract class Heuristic implements Comparator<Node> {
 				}	
 
 				Box currentBoxMoving = n.boxMap.get(n.newBox.get(Integer.toString(agentIndex)));
-
+		
 				int length = 0;
 
 				if (!currentGoal.getState()) {
@@ -138,20 +139,20 @@ public abstract class Heuristic implements Comparator<Node> {
 					length = width + height;
 
 					// Better to move to the right goal character
-					if (currentBoxMoving != null && Character.toLowerCase(currentBoxMoving.getCharacter()) == currentGoal.getCharacter()) {
+					if (Character.toLowerCase(currentBoxMoving.getCharacter()) == currentGoal.getCharacter()) {
 						if (length < minLength) {
 							minLength = length;
 						}
 					}
 				}
-
+				
 				// Right box in right goal priority
 				if ((currentBox == null) || (currentBox != null && currentBox.getAssign() != currentGoal.getAssign())) {
 					notRightAssigned++;
 				}
 
 				// Priority to move to the right goal
-				if (currentBoxMoving != null && currentBoxMoving.getAssign() == currentGoal.getAssign()) {
+				if (currentBoxMoving.getAssign() == currentGoal.getAssign()) {
 					int movingBoxRow = n.newBox.get(Integer.toString(agentIndex)).getX();
 					int movingBoxCol = n.newBox.get(Integer.toString(agentIndex)).getY();
 
@@ -175,7 +176,6 @@ public abstract class Heuristic implements Comparator<Node> {
 					break;
 				} */
 			}
-
 		}
 
 		if (minLength == Integer.MAX_VALUE) {
