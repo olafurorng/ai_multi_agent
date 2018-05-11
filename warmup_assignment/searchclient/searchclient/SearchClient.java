@@ -131,25 +131,33 @@ public class SearchClient {
             if (iterations == 10000) {
 				System.err.println(strategy.searchStatus());
 				int counter = 0;
+				//int highest = 0;
+				//Goals highestGoal = null;
+
 				for (Map.Entry<Coordinate, Goals> entry : Node.GOALS.entrySet()) {
 					Goals currentGoal = entry.getValue();
 					int goalRow = entry.getKey().getX();
 					int goalCol = entry.getKey().getY();
 
 					Box currentBox = leafNode.boxMap.get(new Coordinate(goalRow, goalCol));
-	
+
+					/*if(highest < currentGoal.getFinished()) {
+						highest = currentGoal.getFinished();
+						highestGoal = currentGoal;
+					}*/
+					currentGoal.setPriority(1);
 					// If goal is not finished
 					if ((currentBox == null) || (currentBox != null && Character.toLowerCase(currentBox.getCharacter()) != currentGoal.getCharacter())) {
 						counter++;
-						//currentGoal.setPriority(currentGoal.getPriority() + 1);
-						//currentGoal.setPriority(currentGoal.getPriority() + 1);
-						//System.err.println("pri goals: " + currentGoal.getPriority());
 					}
-					//System.err.println("current goal: " + currentGoal.getCharacter() + ": " + currentGoal.getPriority());
+					//System.err.println("current goal: " + currentGoal.getCharacter() + ": " + currentGoal.getFinished());
 
 				}
+				//System.err.println("highestGoal goal: " + highestGoal.getCharacter());
+				//highestGoal.setPriority(100);
+
 				System.err.println("Unfinish goals: " + counter);
-				//System.err.println(leafNode.toString());
+				System.err.println(leafNode.toString());
 				iterations = 0;
 			}
 

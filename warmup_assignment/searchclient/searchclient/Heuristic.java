@@ -11,6 +11,7 @@ public abstract class Heuristic implements Comparator<Node> {
 		// Here's a chance to pre-process the static parts of the level.
 		int counter = 1;
 
+		// Assign goal to a box
 		for (Map.Entry<Coordinate, Goals> entry : Node.GOALS.entrySet()) {
 			int minLength = Integer.MAX_VALUE;
 			Box minBox = null;
@@ -51,35 +52,62 @@ public abstract class Heuristic implements Comparator<Node> {
 		int goalsLeft = 0;
 		int notRightAssigned = 0;
 		int assignedDistance = 0;
-		int closestBox = Integer.MAX_VALUE;
 		int minLength = Integer.MAX_VALUE;
+		//int priority = 0;
+		//int closestBoxPriority = 0;
 
 		if (n.actions[agentIndex].actionType == Type.Move) {
+	
+			/*int assignedGoalPriority = 0;
+			for (Map.Entry<Coordinate, Goals> entry : Node.GOALS.entrySet()) {
+				Goals currentGoal = entry.getValue();
+
+				if (!currentGoal.getState()) {
+					currentGoal.setFinished(currentGoal.getFinished() + 1);
+					//priority += currentGoal.getPriority() * 100000;				
+				} 
+				if (currentGoal.getPriority() == 100) {
+					assignedGoalPriority = currentGoal.getAssign();
+				}
+			}*/
 
 			for (Coordinate coordinate : n.boxMap.keySet()) {
 				int row = coordinate.getX();
 				int col = coordinate.getY();
 				Goals currentGoal = Node.GOALS.get(coordinate);
+				Box currentBox = n.boxMap.get(new Coordinate(row, col));
 
 				// Find closest box that is not in the right goal
-				if ((currentGoal == null) || (currentGoal != null && Character.toLowerCase(n.boxMap.get(new Coordinate(row, col)).getCharacter()) != currentGoal.getCharacter())) {
+				int length = 0;
+
+				if ((currentGoal == null) || (currentGoal != null && Character.toLowerCase(currentBox.getCharacter()) != currentGoal.getCharacter())) {
 					int width = Math.abs(n.agentsCol[agentIndex] - col);
 					int height = Math.abs(n.agentsRow[agentIndex] - row);
 
-					int length = width + height;
+					length = width + height;
 
-					if (length < closestBox ) {
-						closestBox = length;
+					if (length < minLength ) {
+						minLength = length;
 					}
 
 					goalsLeft++;
 				}
 
 				// Priority
-				if ((currentGoal == null) || (currentGoal != null && n.boxMap.get(new Coordinate(row, col)).getAssign() != currentGoal.getAssign())) {
+				if ((currentGoal == null) || (currentGoal != null && currentBox.getAssign() != currentGoal.getAssign())) {
 					notRightAssigned++;
 				}
+
+				/*if (currentBox.getAssign() == assignedGoalPriority ) {
+					minLength = length;	
+					goalsLeft = 1;
+					notRightAssigned = 0;
+					break;
+				}*/
 			}
+			
+			// So moving is almost always worse then pushing and moving a box not in the right goal
+			minLength += 100;
 		}
 		else if (n.actions[agentIndex].actionType == Type.Push || n.actions[agentIndex].actionType == Type.Pull) {
 
@@ -94,17 +122,20 @@ public abstract class Heuristic implements Comparator<Node> {
 				if (currentBox != null && Character.toLowerCase(currentBox.getCharacter()) == currentGoal.getCharacter()) {
 					currentGoal.setState(true);
 				} else {
-					currentGoal.setState(false);
-					goalsLeft++;
-				}
+					currentGoal.setState(false);	
+					goalsLeft++;	
+					//currentGoal.setFinished(currentGoal.getFinished() + 1);		
+				}	
 
 				Box currentBoxMoving = n.boxMap.get(n.newBox.get(Integer.toString(agentIndex)));
+
+				int length = 0;
 
 				if (!currentGoal.getState()) {
 					int width = Math.abs(n.agentsCol[agentIndex] - goalCol);
 					int height = Math.abs(n.agentsRow[agentIndex] - goalRow);
 
-					int length = width + height;
+					length = width + height;
 
 					// Better to move to the right goal character
 					if (currentBoxMoving != null && Character.toLowerCase(currentBoxMoving.getCharacter()) == currentGoal.getCharacter()) {
@@ -124,27 +155,38 @@ public abstract class Heuristic implements Comparator<Node> {
 					int movingBoxRow = n.newBox.get(Integer.toString(agentIndex)).getX();
 					int movingBoxCol = n.newBox.get(Integer.toString(agentIndex)).getY();
 
-					int width2 = Math.abs(movingBoxCol - goalCol);
-					int height2 = Math.abs(movingBoxRow - goalRow);
+					int width = Math.abs(movingBoxCol - goalCol);
+					int height = Math.abs(movingBoxRow - goalRow);
 
-					assignedDistance = (width2 + height2) * 10;
+					assignedDistance = width + height;
 				}
+
+				/*if (currentGoal.getPriority() == 100) {
+					minLength = length;	
+					goalsLeft = 1;
+					notRightAssigned = 0;
+					assignedDistance = 0;
+					
+					if (currentBox != null && Character.toLowerCase(currentBox.getCharacter()) == currentGoal.getCharacter()) {
+						currentGoal.setPriority(1);
+						goalsLeft = 0;
+						System.err.println("Goal c happens");
+					}
+					break;
+				} */
 			}
 
 		}
 
-		if (closestBox == Integer.MAX_VALUE) {
-			closestBox = 0;
-		}
 		if (minLength == Integer.MAX_VALUE) {
 			minLength = 0;
 		}
 
-		int heuristicValue = goalsLeft*100000 + notRightAssigned*10000 + minLength * 100 + assignedDistance + closestBox * 1000;
-
 		if (n.actions[agentIndex].actionType == Type.NoOp) {
 			heuristicValue = 10000000;
 		}
+
+		int heuristicValue = goalsLeft*100 + (notRightAssigned*50 + assignedDistance) + minLength;
 
 		//System.err.println("heuristic: " + heuristicValue);
 		return heuristicValue;

@@ -7,12 +7,13 @@ public class Goals {
     private Boolean state;
     private int assign;
     private int priority;
+    private int numberOfFinished;
 
     public Goals(char character, Boolean state, int assign) {
         this.character = character;
         this.state = state;
         this.assign = assign;
-        this.priority = 0;
+        this.priority = 1;
     }
 
     public char getCharacter() {
@@ -33,6 +34,14 @@ public class Goals {
 
     public int getPriority() {
         return priority;
+    }
+
+    public void setFinished(int numberOfFinished) {
+        this.numberOfFinished = numberOfFinished;
+    }
+
+    public int getFinished() {
+        return numberOfFinished;
     }
 
     public void setPriority(int priority) {
