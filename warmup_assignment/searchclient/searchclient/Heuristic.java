@@ -99,7 +99,7 @@ public abstract class Heuristic implements Comparator<Node> {
 				}
 
 				Box currentBoxMoving = n.boxMap.get(n.newBox.get(Integer.toString(agentIndex)));
-/*
+
 				if (!currentGoal.getState()) {
 					int width = Math.abs(n.agentsCol[agentIndex] - goalCol);
 					int height = Math.abs(n.agentsRow[agentIndex] - goalRow);
@@ -107,12 +107,12 @@ public abstract class Heuristic implements Comparator<Node> {
 					int length = width + height;
 
 					// Better to move to the right goal character
-					if (Character.toLowerCase(currentBoxMoving.getCharacter()) == currentGoal.getCharacter()) {
+					if (currentBoxMoving != null && Character.toLowerCase(currentBoxMoving.getCharacter()) == currentGoal.getCharacter()) {
 						if (length < minLength) {
 							minLength = length;
 						}
 					}
-				}*/
+				}
 
 				// Right box in right goal priority
 				if ((currentBox == null) || (currentBox != null && currentBox.getAssign() != currentGoal.getAssign())) {
@@ -120,8 +120,7 @@ public abstract class Heuristic implements Comparator<Node> {
 				}
 
 				// Priority to move to the right goal
-
-				if (currentBoxMoving.getAssign() == currentGoal.getAssign()) {
+				if (currentBoxMoving != null && currentBoxMoving.getAssign() == currentGoal.getAssign()) {
 					int movingBoxRow = n.newBox.get(Integer.toString(agentIndex)).getX();
 					int movingBoxCol = n.newBox.get(Integer.toString(agentIndex)).getY();
 
@@ -142,6 +141,11 @@ public abstract class Heuristic implements Comparator<Node> {
 		}
 
 		int heuristicValue = goalsLeft*100000 + notRightAssigned*10000 + minLength * 100 + assignedDistance + closestBox * 1000;
+
+		if (n.actions[agentIndex].actionType == Type.NoOp) {
+			heuristicValue = 10000000;
+		}
+
 		//System.err.println("heuristic: " + heuristicValue);
 		return heuristicValue;
 	}

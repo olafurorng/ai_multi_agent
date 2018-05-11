@@ -40,8 +40,7 @@ public class Node {
 	public Map<Coordinate, Box> boxMap = new HashMap<Coordinate, Box>();
 	public static HashMap<Coordinate, Goals> GOALS = new HashMap<Coordinate, Goals>();
 
-	//public Coordinate newBox;
-    public Map<String, Coordinate> newBox = new HashMap<String, Coordinate>();
+	public Map<String, Coordinate> newBox = new HashMap<String, Coordinate>();
 
 	public Node parent;
 	public Command[] actions = new Command[NUMBER_OF_AGENTS];

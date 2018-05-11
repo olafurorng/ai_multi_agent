@@ -46,7 +46,7 @@ public class ExpendedNodesHelper {
                         n.boxMap.remove(new Coordinate(newAgentRow, newAgentCol));
                         Box box = new Box(currentBox.getCharacter(), currentBox.getAssign());
 
-
+                        n.boxMap.put(new Coordinate(newBoxRow, newBoxCol), box);
                         n.newBox.put(Integer.toString(agentIndex), new Coordinate(newBoxRow, newBoxCol));
 
                         expandedNodes.add(n);
