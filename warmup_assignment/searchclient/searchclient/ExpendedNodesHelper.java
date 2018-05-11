@@ -40,9 +40,9 @@ public class ExpendedNodesHelper {
                         n.actions[agentIndex] = c;
                         n.agentsRow[agentIndex] = newAgentRow;
                         n.agentsCol[agentIndex] = newAgentCol;
-
+                 
                         Box currentBox =  n.boxMap.get(new Coordinate(newAgentRow, newAgentCol));
-
+      
                         n.boxMap.remove(new Coordinate(newAgentRow, newAgentCol));
                         Box box = new Box(currentBox.getCharacter(), currentBox.getAssign());
 

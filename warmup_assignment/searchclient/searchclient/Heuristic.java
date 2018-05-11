@@ -182,11 +182,11 @@ public abstract class Heuristic implements Comparator<Node> {
 			minLength = 0;
 		}
 
+		int heuristicValue = goalsLeft*100 + (notRightAssigned*50 + assignedDistance) + minLength;
+
 		if (n.actions[agentIndex].actionType == Type.NoOp) {
 			heuristicValue = 10000000;
 		}
-
-		int heuristicValue = goalsLeft*100 + (notRightAssigned*50 + assignedDistance) + minLength;
 
 		//System.err.println("heuristic: " + heuristicValue);
 		return heuristicValue;
