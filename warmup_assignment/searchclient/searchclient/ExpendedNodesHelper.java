@@ -37,7 +37,7 @@ public class ExpendedNodesHelper {
                     int newBoxRow = newAgentRow + Command.dirToRowChange(c.dir2);
                     int newBoxCol = newAgentCol + Command.dirToColChange(c.dir2);
                     // .. and that new cell of box is free
-                    if (nodeBefore.cellIsFree(newBoxRow, newBoxCol) && parentNode.cellIsFree(newAgentRow, newAgentCol)) { // we have to check if both the nodeBefore and the parentNode has free cell
+                    if (nodeBefore.cellIsFree(newBoxRow, newBoxCol) && parentNode.cellIsFree(newBoxRow, newBoxCol)) { // we have to check if both the nodeBefore and the parentNode has free cell
                         Node n = nodeBefore.ChildNode(parentNode, nodeBefore);
                         n.actions[agentIndex] = c;
                         n.agentsRow[agentIndex] = newAgentRow;
