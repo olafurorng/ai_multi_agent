@@ -49,14 +49,30 @@ public abstract class Heuristic implements Comparator<Node> {
 
 	public int hPerAgent(Node n, int agentIndex) {
 
+		int noMove = 0;
 		int goalsLeft = 0;
 		int notRightAssigned = 0;
 		int assignedDistance = 0;
 		int minLength = Integer.MAX_VALUE;
 		//int priority = 0;
 		//int closestBoxPriority = 0;
+		if (n.actions[agentIndex].actionType == Type.NoOp) {	
 
-		if (n.actions[agentIndex].actionType == Type.Move) {
+			for (Coordinate coordinate : n.boxMap.keySet()) {
+				int row = coordinate.getX();
+				int col = coordinate.getY();
+				Goals currentGoal = Node.GOALS.get(coordinate);
+				Box currentBox = n.boxMap.get(new Coordinate(row, col));
+
+				if (currentBox.getColor() == Node.agentsColor[agentIndex]) {
+					if ((currentGoal == null) || (currentGoal != null && Character.toLowerCase(currentBox.getCharacter()) != currentGoal.getCharacter())) {
+						noMove = 10000000;
+					}
+				}
+
+			}
+		}
+		else if (n.actions[agentIndex].actionType == Type.Move) {
 	
 			/*int assignedGoalPriority = 0;
 			for (Map.Entry<Coordinate, Goals> entry : Node.GOALS.entrySet()) {
@@ -80,8 +96,8 @@ public abstract class Heuristic implements Comparator<Node> {
 				// Find closest box that is not in the right goal
 				int length = 0;
 
-				if ((currentGoal == null) || (currentGoal != null && Character.toLowerCase(currentBox.getCharacter()) != currentGoal.getCharacter()) &&
-					currentBox.getColor() == Node.agentsColor[agentIndex]) {
+				if ((currentGoal == null) || (currentGoal != null && Character.toLowerCase(currentBox.getCharacter()) != currentGoal.getCharacter() &&
+					currentBox.getColor() == Node.agentsColor[agentIndex] && currentBox.getAssign() != 0)) {
 					int width = Math.abs(n.agentsCol[agentIndex] - col);
 					int height = Math.abs(n.agentsRow[agentIndex] - row);
 
@@ -112,6 +128,8 @@ public abstract class Heuristic implements Comparator<Node> {
 		}
 		else if (n.actions[agentIndex].actionType == Type.Push || n.actions[agentIndex].actionType == Type.Pull) {
 
+			Box currentBoxMoving = n.boxMap.get(n.newBox.get(Integer.toString(agentIndex)));
+
 			for (Map.Entry<Coordinate, Goals> entry : Node.GOALS.entrySet()) {
 				Goals currentGoal = entry.getValue();
 
@@ -128,8 +146,6 @@ public abstract class Heuristic implements Comparator<Node> {
 					//currentGoal.setFinished(currentGoal.getFinished() + 1);		
 				}	
 
-				Box currentBoxMoving = n.boxMap.get(n.newBox.get(Integer.toString(agentIndex)));
-		
 				int length = 0;
 
 				if (!currentGoal.getState()) {
@@ -145,7 +161,7 @@ public abstract class Heuristic implements Comparator<Node> {
 						}
 					}
 				}
-				
+
 				// Right box in right goal priority
 				if ((currentBox == null) || (currentBox != null && currentBox.getAssign() != currentGoal.getAssign())) {
 					notRightAssigned++;
@@ -176,17 +192,18 @@ public abstract class Heuristic implements Comparator<Node> {
 					break;
 				} */
 			}
+
+			// Doesn't like moving box that does not have a goal
+			if (currentBoxMoving.getAssign() == 0) {
+				minLength = 100;
+			}
 		}
 
 		if (minLength == Integer.MAX_VALUE) {
 			minLength = 0;
 		}
 
-		int heuristicValue = goalsLeft*100 + (notRightAssigned*50 + assignedDistance) + minLength;
-
-		if (n.actions[agentIndex].actionType == Type.NoOp) {
-			heuristicValue = 10000000;
-		}
+		int heuristicValue = goalsLeft*100 + (notRightAssigned*50 + assignedDistance) + minLength + noMove;
 
 		//System.err.println("heuristic: " + heuristicValue);
 		return heuristicValue;
