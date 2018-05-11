@@ -56,8 +56,12 @@ public class SearchClient {
 
 		// Creating the initial state Node (Previous existing code)
 		int row = 0;
-		boolean agentFound = false;
 		this.initialState = new Node(null);
+
+		List<Integer> agentsRow = new ArrayList<Integer>();
+		List<Integer> agentsCol = new ArrayList<Integer>();
+		List<Integer> agentNumber = new ArrayList<Integer>();
+		List<Color> agentsColor = new ArrayList<Color>();
 
 		for (String serverMessageLine: lines) {
 			for (int col = 0; col < serverMessageLine.length(); col++) {
@@ -67,18 +71,15 @@ public class SearchClient {
 				if (chr == '+') { // Wall.
 					Node.WALLS.add(coordinate);
 				} else if ('0' <= chr && chr <= '9') { // Agent.
-					if (agentFound) {
-						System.err.println("Error, not a single agent level");
-						System.err.println("Also remember to pass in different agent colors when we implement this");
-						System.exit(1);
+					agentsRow.add(row);
+					agentsCol.add(col);
+					agentNumber.add(Integer.parseInt(String.valueOf(chr)));
+					String colorAsString = colorsMap.get(chr);
+					if (colorAsString == null) {
+						colorAsString = "blue"; // defaulting to blue if not defined
 					}
-					agentFound = true;
-					this.initialState.agentRow = row;
-					this.initialState.agentCol = col;
-					if (colorsMap.size() > 0) { // colors are defined in this level
-                        Color agentColor = ColorHelper.getColorFromString(colorsMap.get('0')); // FIXME: CHANGE THIS WHEN WE ADD MORE AGENTS
-                        Node.agentColor = agentColor;
-                    }
+					Color agentColor = ColorHelper.getColorFromString(colorAsString);
+					agentsColor.add(agentColor);
 				} else if ('A' <= chr && chr <= 'Z') { // Box.
 					Box box = new Box(chr, 0);
 					this.initialState.boxMap.put(coordinate, box);
@@ -96,169 +97,23 @@ public class SearchClient {
 			row++;
 		}
 
+		Node.setNumberOfAgents(agentsCol.size());
+		initialState.initializeActionsForInitialState();
+
+		initialState.agentsRow = new int[agentsRow.size()];
+		initialState.agentsCol = new int[agentsCol.size()];
+		Node.agentsColor = new Color[agentsColor.size()];
+		for (int i = 0; i < agentsRow.size(); i++) {
+			initialState.agentsRow[agentNumber.get(i)] = agentsRow.get(i);
+			initialState.agentsCol[agentNumber.get(i)] = agentsCol.get(i);
+			Node.agentsColor[agentNumber.get(i)] = agentsColor.get(i);
+		}
+
 		// Lets relax the problem by adding edges / walls
-		// addingWalls(this.initialState);
+		//WallBuilder.buildWallsSafely(this.initialState);
+		WallBuilder.buildWallInEmptyCellWith3TouchingWallAnd1TouchingGoal(this.initialState);
 	}
 
-	/**
-	 * This is a type of Relaxed problem, more specific: Adding edges relaxed problem.
-	 * Walls or edges are added to decrease the size of the level, but has rules to
-	 * prevent that the level won't become unsolvable
-	 *
-	 * Cons:
-	 * 		- Length of the solution can be longer, e.g. in SAsoko3_48.lvl
-	 * 		- Level which are not squared, have many free cells, and therefore can
-	 * 		  become unsolvable.
-	 */
-	private void addingWalls(Node initialState) {
-		System.err.println("----------------------------------------");
-		System.err.println("Walls before");
-		System.err.println(initialState.toString());
-
-		// we will start adding walls in free cells which are outside the level
-		// lets start with adding from the left side
-
-		for (int i = 0; i < Node.MAX_ROW; i++) {
-			for (int j = 0; j < Node.MAX_COL; j++) {
-				if (Node.WALLS.contains(new Coordinate(i, j))) {
-					break;
-				} else {
-					Node.WALLS.add(new Coordinate(i,j));
-				}
-			}
-		}
-		// then add from the right side
-		for (int i = 0; i < Node.MAX_ROW; i++) {
-			for (int j = Node.MAX_COL - 1; j >= 0 ; j--) {
-				if (Node.WALLS.contains(new Coordinate(i,j))) {
-					break;
-				} else {
-					Node.WALLS.add(new Coordinate(i,j));
-				}
-			}
-		}
-
-		// count how many free cells compared to number of agents+boxes
-		int numberOfNewBoxesThisRound = 1000; // initialized as some number above 0
-		int iterations = 0;
-
-		while (numberOfNewBoxesThisRound > 0) {
-			numberOfNewBoxesThisRound = 0;
-			for (int i = 0; i < Node.MAX_ROW; i++) {
-				for (int j = 0; j < Node.MAX_COL; j++) {
-					if (initialState.cellIsFreeAndNoGoalOrAgent(i,j)) {
-						// now the cell is free, so we check if there is no
-						// goal, box or agent around that cell
-						boolean topFree = initialState.cellIsFreeOfGoalBoxAndAgent(i - 1, j);
-						boolean topRightFree = initialState.cellIsFreeOfGoalBoxAndAgent(i - 1, j + 1);
-						boolean rightFree = initialState.cellIsFreeOfGoalBoxAndAgent(i, j + 1);
-						boolean bottomRighFree = initialState.cellIsFreeOfGoalBoxAndAgent(i + 1, j + 1);
-						boolean bottomFree = initialState.cellIsFreeOfGoalBoxAndAgent(i + 1, j);
-						boolean leftBottomFree = initialState.cellIsFreeOfGoalBoxAndAgent(i + 1, j - 1);
-						boolean leftFree = initialState.cellIsFreeOfGoalBoxAndAgent(i, j - 1);
-						boolean leftTopFree = initialState.cellIsFreeOfGoalBoxAndAgent(i - 1, j - 1);
-
-						if (topFree && topRightFree && rightFree && bottomRighFree && bottomFree && leftBottomFree && leftFree && leftTopFree) {
-							// now there is not goal, box or agent near this cell
-
-							boolean wallTop = Node.WALLS.contains(new Coordinate(i-1, j));
-							boolean wallTopRight = Node.WALLS.contains(new Coordinate(i-1, j+1));
-							boolean wallRight = Node.WALLS.contains(new Coordinate(i, j+1));
-							boolean wallBottomRight = Node.WALLS.contains(new Coordinate(i + 1, j+1));
-							boolean wallBottom = Node.WALLS.contains(new Coordinate(i + 1, j));
-							boolean wallLeftBottom = Node.WALLS.contains(new Coordinate(i + 1, j - 1));
-							boolean wallLeft = Node.WALLS.contains(new Coordinate(i,j - 1));
-							boolean wallLeftTop = Node.WALLS.contains(new Coordinate(i-1, j-1));
-
-							/*
-								Wall is said to be touching a cell, if the wall is on the left, right, top or bottom.
-								Wall is said to be nearby a cell, if the wall is on the top-right, right-bottom, bottom-left or left-top
-							 */
-							int numberOfWallsTouching = 0;
-
-							if (wallTop) numberOfWallsTouching++;
-							if (wallRight) numberOfWallsTouching++;
-							if (wallBottom) numberOfWallsTouching++;
-							if (wallLeft) numberOfWallsTouching++;
-
-							Coordinate coordinate = new Coordinate(i,j);
-
-
-							// 4 or 3 WALLS TOUCHING
-							if (numberOfWallsTouching == 4 || numberOfWallsTouching == 3) {
-								// we can safely add a wall
-								Node.WALLS.add(coordinate);
-								numberOfNewBoxesThisRound++;
-							}
-
-							// 2 WALLS TOUCHING
-							if (numberOfWallsTouching == 2) {
-								// we exclude if the cell is part of a "tunnel", i.e.
-								// - if the touching walls are opposite, i.e. walltop and wallbottom or wallright and wallleft
-								// - if the opposite nearby cell to the two touching walls, is a wall
-
-								// WALLS are top and left
-								if (wallTop && wallLeft && !wallBottomRight) {
-									Node.WALLS.add(coordinate);
-									numberOfNewBoxesThisRound++;
-								}
-
-								// walls are top and right
-								if (wallTop && wallRight && !wallLeftBottom) {
-									Node.WALLS.add(coordinate);
-									numberOfNewBoxesThisRound++;
-								}
-
-								// walls are right and bottom
-								if (wallRight && wallBottom && !wallLeftTop) {
-									Node.WALLS.add(coordinate);
-									numberOfNewBoxesThisRound++;
-								}
-
-								// walls are bottom and left
-								if (wallBottom && wallLeft && !wallTopRight) {
-									Node.WALLS.add(coordinate);
-									numberOfNewBoxesThisRound++;
-								}
-							}
-
-							// 1 WALL TOUCHING
-							if (numberOfWallsTouching == 1) {
-								// we exclude if the cell is part of a "tunnel", i.e.
-								// - if opposite nearby cell to the one touching wall, is a wall
-								if (wallTop && !wallBottomRight && !wallLeftBottom) {
-									Node.WALLS.add(coordinate);
-									numberOfNewBoxesThisRound++;
-								}
-
-								if (wallRight && !wallLeftTop && !wallLeftBottom) {
-									Node.WALLS.add(coordinate);
-									numberOfNewBoxesThisRound++;
-								}
-
-								if (wallBottom && !wallTopRight && !wallLeftTop) {
-									Node.WALLS.add(coordinate);
-									numberOfNewBoxesThisRound++;
-								}
-
-								if (wallLeft && !wallBottomRight && !wallTopRight) {
-									Node.WALLS.add(coordinate);
-									numberOfNewBoxesThisRound++;
-								}
-							}
-
-						}
-					}
-				}
-			}
-
-			iterations++;
-		}
-		System.err.println("----------------------------------------");
-		System.err.println("Adding walls done, iterations: " + iterations);
-		System.err.println(initialState.toString());
-		System.err.println("----------------------------------------");
-	}
 
 	public LinkedList<Node> Search(Strategy strategy) throws IOException {
 		System.err.format("Search starting with strategy %s.\n", strategy.toString());
@@ -341,7 +196,14 @@ public class SearchClient {
                     strategy = new StrategyDFS();
                     break;
                 case "-astar":
-                    strategy = new StrategyBestFirst(new AStar(client.initialState));
+                	if (Node.NUMBER_OF_AGENTS == 1) {
+                		// single agent
+						strategy = new StrategyBestFirst(new AStarSA(client.initialState));
+					} else {
+                		// multi agent
+						strategy = new StrategyBestFirst(new AStarMA(client.initialState));
+					}
+
                     break;
                 case "-wastar":
                     // You're welcome to test WA* out with different values, but for the report you must at least indicate benchmarks for W = 5.
@@ -377,7 +239,17 @@ public class SearchClient {
 			System.err.println(strategy.searchStatus());
 
 			for (Node n : solution) {
-				String act = n.action.toString();
+
+				String act = "[";
+
+				for (int i = 0; i < Node.NUMBER_OF_AGENTS; i++) {
+					act += n.actions[i];
+					if (i != Node.NUMBER_OF_AGENTS - 1) {// if this is not the last command
+						act += ",";
+					}
+				}
+				act += "]";
+
 				System.out.println(act);
 				String response = serverMessages.readLine();
 				if (response.contains("false")) {
