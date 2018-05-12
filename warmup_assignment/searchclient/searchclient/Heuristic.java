@@ -37,8 +37,9 @@ public abstract class Heuristic implements Comparator<Node> {
 					}	
 				}			
 			}
+
 			currentGoal.setAssign(counter);
-			minBox.setAssign(counter);
+			minBox.setAssign(counter);	
 			counter++;
 		}
 	}
@@ -98,7 +99,7 @@ public abstract class Heuristic implements Comparator<Node> {
 
 				// Find closest box that is not in the right goal
 				int length = 0;
-				if ((currentGoal == null) || (currentGoal != null && Character.toLowerCase(currentBox.getCharacter()) != currentGoal.getCharacter() &&
+				if ((currentGoal == null && currentBox.getAssign() != 0) || (currentGoal != null && Character.toLowerCase(currentBox.getCharacter()) != currentGoal.getCharacter() &&
 					currentBox.getColor() == Node.agentsColor[agentIndex] && currentBox.getAssign() != 0)) {
 					int width = Math.abs(n.agentsCol[agentIndex] - col);
 					int height = Math.abs(n.agentsRow[agentIndex] - row);
@@ -126,7 +127,7 @@ public abstract class Heuristic implements Comparator<Node> {
 			}
 			
 			// So moving is almost always worse then pushing and moving a box not in the right goal
-			minLength += 100;
+			minLength += 75;
 		}
 		else if (n.actions[agentIndex].actionType == Type.Push || n.actions[agentIndex].actionType == Type.Pull) {
 

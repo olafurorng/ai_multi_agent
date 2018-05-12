@@ -147,7 +147,7 @@ public class SearchClient {
 						highest = currentGoal.getFinished();
 						highestGoal = currentGoal;
 					}*/
-					currentGoal.setPriority(1);
+					// currentGoal.setPriority(1);
 					// If goal is not finished
 					if ((currentBox == null) || (currentBox != null && Character.toLowerCase(currentBox.getCharacter()) != currentGoal.getCharacter())) {
 						counter++;
@@ -173,6 +173,7 @@ public class SearchClient {
 				if (!strategy.isExplored(n) && !strategy.inFrontier(n)) {
 					strategy.addToFrontier(n);
 				}
+			
 			}
 
 			iterations++;
