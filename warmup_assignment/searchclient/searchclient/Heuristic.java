@@ -7,7 +7,11 @@ import java.util.Map;
 
 public abstract class Heuristic implements Comparator<Node> {
 
+	public static AgentCommunications agentCommunications;
+
 	public Heuristic(Node initialState) {
+		agentCommunications = new AgentCommunications();
+
 		// Here's a chance to pre-process the static parts of the level.
 		int counter = 1;
 
@@ -100,10 +104,18 @@ public abstract class Heuristic implements Comparator<Node> {
 				int length = 0;
 				if ((currentGoal == null) || (currentGoal != null && Character.toLowerCase(currentBox.getCharacter()) != currentGoal.getCharacter() &&
 					currentBox.getColor() == Node.agentsColor[agentIndex] && currentBox.getAssign() != 0)) {
+
+					// we calculate the length to the box normally
 					int width = Math.abs(n.agentsCol[agentIndex] - col);
 					int height = Math.abs(n.agentsRow[agentIndex] - row);
-
 					length = width + height;
+
+
+					if (agentCommunications.getTouchedBox(coordinate) != null && agentCommunications.getTouchedBox(coordinate).getColor() == Node.agentsColor[agentIndex]) {
+						// a box of other color has been touched and we put high priority on going to that box
+						// as that box and agent has the same color instead of e.g. moving other boxes
+						length += -100;
+					}
 
 					if (length < minLength ) {
 						minLength = length;

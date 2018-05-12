@@ -42,6 +42,8 @@ public class ExpendedNodesHelper {
                         n.actions[agentIndex] = c;
                         n.agentsRow[agentIndex] = newAgentRow;
                         n.agentsCol[agentIndex] = newAgentCol;
+
+                        Heuristic.agentCommunications.removeBox(new Coordinate(newAgentRow, newAgentCol));
                  
                         Box currentBox =  n.boxMap.get(new Coordinate(newAgentRow, newAgentCol));
       
@@ -54,6 +56,9 @@ public class ExpendedNodesHelper {
 
                         expandedNodes.add(n);
                     }
+                } else if (nodeBefore.boxAt(newAgentRow, newAgentCol)) {
+                    // just not the same color of the agent and the box
+                    Heuristic.agentCommunications.onBoxWithOtherColorTouched(new Coordinate(newAgentRow, newAgentCol), nodeBefore.boxMap.get(new Coordinate(newAgentRow, newAgentCol)));
                 }
             } else if (c.actionType == Command.Type.Pull) {
                 // Cell is free where agent is going
@@ -68,6 +73,8 @@ public class ExpendedNodesHelper {
                         n.agentsRow[agentIndex] = newAgentRow;
                         n.agentsCol[agentIndex] = newAgentCol;
 
+                        Heuristic.agentCommunications.removeBox(new Coordinate(boxRow, boxCol));
+
                         Box currentBox =  n.boxMap.get(new Coordinate(boxRow, boxCol));
                         n.boxMap.remove(new Coordinate(boxRow, boxCol));
 
@@ -78,6 +85,9 @@ public class ExpendedNodesHelper {
                         n.newBox.put(Integer.toString(agentIndex), new Coordinate(nodeBefore.agentsRow[agentIndex], nodeBefore.agentsCol[agentIndex]));
 
                         expandedNodes.add(n);
+                    } else if (nodeBefore.boxAt(boxRow, boxCol)) {
+                        // just not the same color of the agent and the box
+                        Heuristic.agentCommunications.onBoxWithOtherColorTouched(new Coordinate(newAgentRow, newAgentCol), nodeBefore.boxMap.get(new Coordinate(newAgentRow, newAgentCol)));
                     }
                 }
             }
