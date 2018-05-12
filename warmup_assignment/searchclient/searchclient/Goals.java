@@ -8,12 +8,20 @@ public class Goals {
     private int assign;
     private int priority;
     private int numberOfFinished;
+    private final ColorHelper.Color color;
 
     public Goals(char character, Boolean state, int assign) {
         this.character = character;
         this.state = state;
         this.assign = assign;
         this.priority = 1;
+        
+        String colorAsString = SearchClient.colorsMap.get(Character.toUpperCase(character));
+        if (colorAsString != null) {
+            color = ColorHelper.getColorFromString(colorAsString);
+        } else {
+            color = ColorHelper.Color.BLUE;
+        }
     }
 
     public char getCharacter() {
@@ -56,4 +64,7 @@ public class Goals {
         this.assign = assign;
     }
 
+    public ColorHelper.Color getColor() {
+        return color;
+    }
 }

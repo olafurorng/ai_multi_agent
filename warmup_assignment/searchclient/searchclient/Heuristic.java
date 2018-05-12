@@ -60,19 +60,17 @@ public abstract class Heuristic implements Comparator<Node> {
 
 		if (n.actions[agentIndex].actionType == Type.NoOp) {	
 
-			for (Coordinate coordinate : n.boxMap.keySet()) {
-				int row = coordinate.getX();
-				int col = coordinate.getY();
-				Goals currentGoal = Node.GOALS.get(coordinate);
-				Box currentBox = n.boxMap.get(new Coordinate(row, col));
+			for (Map.Entry<Coordinate, Goals> entry : Node.GOALS.entrySet()) {
+				int goalRow = entry.getKey().getX();
+				int goalCol = entry.getKey().getY();
+				Goals currentGoal = entry.getValue();
+				Box currentBox = n.boxMap.get(new Coordinate(goalRow, goalCol));
 
-				if (currentBox.getColor() == Node.agentsColor[agentIndex]) {
-					if ((currentGoal == null) || (currentGoal != null && Character.toLowerCase(currentBox.getCharacter()) != currentGoal.getCharacter())) {
+				if (currentGoal.getColor() == Node.agentsColor[agentIndex]) {
+					if ((currentBox == null) || (currentBox != null && Character.toLowerCase(currentBox.getCharacter()) != currentGoal.getCharacter())) {
 						noMove = 10000000;
 					}
 				}
-
-				// This is missing if a there exist another box without a goal, put color on goals to maybe?
 			}
 		}
 		else if ((n.actions[agentIndex].actionType == Type.Move) 

@@ -14,7 +14,7 @@ Starting the server using the SearchClient solver:
 SearchClient uses the BFS search strategy by default. Use argument -dfs, -astar, -wastar, or -greedy to set alternative search strategies (not initially implemented). For instance, to use DFS search on the same level as above:
    $ java -jar server.jar -l levels/SAD1.lvl -c "java searchclient.SearchClient -dfs" -g 50 -t 300
 
-java -jar server.jar -l levels/SAsoko3_12.lvl -c "java searchclient.SearchClient -astar" -g 50 -t 300
+java -jar server.jar -l levels/SAsoko3_24.lvl -c "java searchclient.SearchClient -astar" -g 50 -t 300
     
 Read more about the server options using the -? argument:
    $ java -jar server.jar -?

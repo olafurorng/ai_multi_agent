@@ -16,7 +16,6 @@ public class Box {
         } else {
             color = ColorHelper.Color.BLUE;
         }
-
     }
 
     public char getCharacter() {
