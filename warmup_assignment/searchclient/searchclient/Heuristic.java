@@ -1,9 +1,8 @@
 package searchclient;
 
-import java.util.Comparator;
-import searchclient.Command.Type;
+import java.util.*;
 
-import java.util.Map;
+import searchclient.Command.Type;
 
 public abstract class Heuristic implements Comparator<Node> {
 
@@ -15,7 +14,7 @@ public abstract class Heuristic implements Comparator<Node> {
 		// Here's a chance to pre-process the static parts of the level.
 		int counter = 1;
 
-		// Assigns goalsto a boxes
+		// Assigns goals to a boxes
 		for (Map.Entry<Coordinate, Goals> entry : Node.GOALS.entrySet()) {
 			int minLength = Integer.MAX_VALUE;
 			Box minBox = null;
@@ -45,6 +44,64 @@ public abstract class Heuristic implements Comparator<Node> {
 			currentGoal.setAssign(counter);
 			minBox.setAssign(counter);	
 			counter++;
+		}
+
+
+
+		/********************************************
+		 ******  DETECTING GOAL DEPENDENCIES   ******
+		 *******************************************/
+
+		for (Map.Entry<Coordinate, Goals> entry : Node.GOALS.entrySet()) {
+			Coordinate coordinate = entry.getKey();
+			Goals goal = entry.getValue();
+
+			// check if goal has been detected to be in a tunnel before
+			boolean goalIsInAlreadyDetectedTunnel = false;
+			for (Tunnel tunnel : Node.TUNNELS) {
+				if (tunnel.goalInTunnel(goal)) {
+					goalIsInAlreadyDetectedTunnel = true;
+				}
+			}
+			if (goalIsInAlreadyDetectedTunnel) {
+				continue;
+			}
+
+			// goal has not been detected to be in a tunnel before, so we check if goal is in end of a tunnel
+			boolean goalIsInEndOfTunnel = TunnelDetection.isGoalInEndOfTunnel(coordinate);
+
+			if (goalIsInEndOfTunnel) {
+
+				// Create the tunnel and add the first cell to the tunnel object
+				Tunnel tunnel = new Tunnel();
+				tunnel.addCellToTunnel(coordinate, goal);
+				Coordinate lastCoordinate = null;
+				Coordinate thisCoordinate = coordinate;
+
+				boolean isStillInTunnel = true;
+				while (isStillInTunnel) {
+					// find the next coordinate in the tunnel
+					Coordinate nextCoordinate = TunnelDetection.findNextCoordinateInTunnel(thisCoordinate, lastCoordinate);
+
+					/*NULLABLE*/
+					Goals goalAtNextCoordinate = Node.GOALS.get(nextCoordinate);
+
+					tunnel.addCellToTunnel(nextCoordinate, goalAtNextCoordinate);
+
+					// detect if we are at the end of the tunnel or not
+					isStillInTunnel = TunnelDetection.isInMiddleOfTunnel(nextCoordinate);
+
+					if (isStillInTunnel) {
+						lastCoordinate = thisCoordinate;
+						thisCoordinate = nextCoordinate;
+
+					} else {
+						tunnel.onTunnelEndDetected();
+					}
+				}
+
+				Node.TUNNELS.add(tunnel);
+			}
 		}
 	}
 
@@ -173,7 +230,96 @@ public abstract class Heuristic implements Comparator<Node> {
 			minLength = 0;
 		}
 
-		int heuristicValue = goalsLeft*100 + (notRightAssigned*50 + assignedDistance) + minLength + noMove;
+
+		// CALCULATE TUNNEL PENALTY
+		int tunnelPenalty = 0;
+		int lengthToIllegalBoxInTunnel = 0;
+		for (Tunnel tunnel : Node.TUNNELS) {
+			for (Map.Entry<Coordinate, Integer> entry : tunnel.getTunnelCells().entrySet()) {
+				Coordinate coordinate = entry.getKey();
+				int position = entry.getValue();
+				Box boxAtAcoordinate = n.boxMap.get(coordinate);
+
+				// if there is box at this coordinate we check if it is allowed
+				if (boxAtAcoordinate != null) {
+
+					// we check if the box is not assigned, e.g. doesn't have a goal for that box
+					if (boxAtAcoordinate.getAssign() == 0) {
+						// we put penalty according to how far away the box is from the tunnel opening
+						tunnelPenalty += tunnel.getTunnelLength()+1 - position;
+						// PENALTY FOR A BOX NOT HAVING A GOAL
+						continue;
+					} else {
+						// we loop through the goals in the tunnel from the deepest goal
+						// 1. we check if the previous goal until this position, has been solved, if
+						//    we detect an unsolved goal, we check if the box is assigned to that goal
+						//    and if not we give penalty
+						// 2. if there is no unsolved goal before this and the box is not assigned to
+						//    the first unsolved goal after, the box gets penalty
+						for (Map.Entry<Goals, Integer> entryGoal : tunnel.getGoalsList().entrySet()) {
+							Goals goal = entryGoal.getKey();
+							int positionOfGoal = entryGoal.getValue();
+
+							if (positionOfGoal > position) {
+								// no unsolved goal before this position, so we check if the box is assigned
+								// to the next goal
+								// TODO: do this, now temporarily we put penalty to get the box out of the tunnel
+								tunnelPenalty += tunnel.getTunnelLength()+1 - position;
+
+								int height = Math.abs(n.agentsRow[agentIndex] - coordinate.getX());
+								int width = Math.abs(n.agentsCol[agentIndex] - coordinate.getY());
+								lengthToIllegalBoxInTunnel = width + height;
+								// PENALTY FOR A GOAL IS MORE FAR AWAY THAN POSITION
+								break;
+							} else {
+								// we check if this goal is solved
+
+								Coordinate goalCoordinates = tunnel.getGoalsCoordinates().get(positionOfGoal);
+								boolean isBoxInGoal = n.boxMap.containsKey(goalCoordinates);
+								if (isBoxInGoal) {
+									// now we know there is box in the goal, but lets check if it is the right box
+									boolean goalIsSolved = goal.getAssign() == n.boxMap.get(goalCoordinates).getAssign();
+									if (goalIsSolved) {
+										// everything is good, we can continue and look at the next goal
+										// OK - GOAL IS SOLVED
+										break;
+									} else {
+										// there exist a goal prior to this position or at this position which is not
+										// solved so we give penalty
+
+										tunnelPenalty += tunnel.getTunnelLength()+1 - position;
+
+										int height = Math.abs(n.agentsRow[agentIndex] - coordinate.getX());
+										int width = Math.abs(n.agentsCol[agentIndex] - coordinate.getY());
+										lengthToIllegalBoxInTunnel = width + height;
+										// PENALTY FOR A UNSOLVED GOAL - WRONG BOX IN THE GOAL
+										break;
+									}
+								} else {
+									// box is not in goal and therefore we check if the box is assigned to this goal or not
+									boolean isAssignedToGoal = boxAtAcoordinate.getAssign() == goal.getAssign();
+									if (isAssignedToGoal) {
+										// the box is on the correct way to the goal
+										break;
+									} else {
+										// the box is not assigned to this goal so therefore penalty
+										tunnelPenalty += tunnel.getTunnelLength()+1 - position;
+
+										int height = Math.abs(n.agentsRow[agentIndex] - coordinate.getX());
+										int width = Math.abs(n.agentsCol[agentIndex] - coordinate.getY());
+										lengthToIllegalBoxInTunnel = width + height;
+										// PENALTY FOR A WRONG BOX IN THE TUNNEL
+										break;
+									}
+								}
+							}
+						}
+					}
+				}
+			}
+		}
+
+		int heuristicValue = tunnelPenalty*10000 + lengthToIllegalBoxInTunnel*1000 + goalsLeft*100 + (notRightAssigned*50 + assignedDistance) + minLength + noMove;
 
 		return heuristicValue;
 	}

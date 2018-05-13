@@ -57,4 +57,13 @@ public class Goals {
     public ColorHelper.Color getColor() {
         return color;
     }
+
+    @Override
+    public String toString() {
+        return "Goals{" +
+                "character=" + character +
+                '}';
+    }
+
+
 }
