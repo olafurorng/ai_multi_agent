@@ -269,7 +269,7 @@ public class WallBuilder {
 
 
                         // 4 or 3 WALLS TOUCHING
-                        if (numberOfWallsTouching == 3 & numberOfGoalTouching == 1) {
+                        if (numberOfWallsTouching == 3) {
                             // we can safely add a wall
                             Node.WALLS.add(coordinate);
                             numberOfNewBoxesThisRound++;

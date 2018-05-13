@@ -33,6 +33,7 @@ public class Node {
 	public static Color[] agentsColor;
 
 
+	public static List<Tunnel> TUNNELS = new ArrayList<Tunnel>();
 	public static List<Coordinate> WALLS = new ArrayList<Coordinate>();
 	public Map<Coordinate, Box> boxMap = new HashMap<Coordinate, Box>();
 	public static HashMap<Coordinate, Goals> GOALS = new HashMap<Coordinate, Goals>();

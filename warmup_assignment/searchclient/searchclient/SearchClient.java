@@ -224,6 +224,10 @@ public class SearchClient {
             System.err.println("Defaulting to BFS search. Use arguments -bfs, -dfs, -astar, -wastar, or -greedy to set the search strategy.");
         }
 
+        for (Tunnel tunnel : Node.TUNNELS) {
+        	System.err.println("Tunnel: " + tunnel);
+		}
+
 		LinkedList<Node> solution;
 		try {
 			solution = client.Search(strategy);
