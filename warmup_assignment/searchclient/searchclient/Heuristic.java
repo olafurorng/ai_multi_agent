@@ -67,14 +67,10 @@ public abstract class Heuristic implements Comparator<Node> {
 				continue;
 			}
 
-			System.err.println("==========================================");
-			System.err.println("DETECTING A GOAL: " + goal);
-
 			// goal has not been detected to be in a tunnel before, so we check if goal is in end of a tunnel
 			boolean goalIsInEndOfTunnel = TunnelDetection.isGoalInEndOfTunnel(coordinate);
 
 			if (goalIsInEndOfTunnel) {
-				System.err.println("DETECTING AN END OF A TUNNEL | goal: " + goal + " - coordinate: " + coordinate);
 
 				// Create the tunnel and add the first cell to the tunnel object
 				Tunnel tunnel = new Tunnel();
@@ -84,14 +80,12 @@ public abstract class Heuristic implements Comparator<Node> {
 
 				boolean isStillInTunnel = true;
 				while (isStillInTunnel) {
-					System.err.println("---------------------");
 					// find the next coordinate in the tunnel
 					Coordinate nextCoordinate = TunnelDetection.findNextCoordinateInTunnel(thisCoordinate, lastCoordinate);
 
 					/*NULLABLE*/
 					Goals goalAtNextCoordinate = Node.GOALS.get(nextCoordinate);
 
-					System.err.println("Next coordinate: " + nextCoordinate + " - goal: " + goalAtNextCoordinate);
 					tunnel.addCellToTunnel(nextCoordinate, goalAtNextCoordinate);
 
 					// detect if we are at the end of the tunnel or not
@@ -276,6 +270,7 @@ public abstract class Heuristic implements Comparator<Node> {
 
 		// CALCULATE TUNNEL PENALTY
 		int tunnelPenalty = 0;
+		int lengthToIllegalBoxInTunnel = 0;
 		for (Tunnel tunnel : Node.TUNNELS) {
 			for (Map.Entry<Coordinate, Integer> entry : tunnel.getTunnelCells().entrySet()) {
 				Coordinate coordinate = entry.getKey();
@@ -289,6 +284,7 @@ public abstract class Heuristic implements Comparator<Node> {
 					if (boxAtAcoordinate.getAssign() == 0) {
 						// we put penalty according to how far away the box is from the tunnel opening
 						tunnelPenalty += tunnel.getTunnelLength()+1 - position;
+						// PENALTY FOR A BOX NOT HAVING A GOAL
 						continue;
 					} else {
 						// we loop through the goals in the tunnel from the deepest goal
@@ -306,6 +302,11 @@ public abstract class Heuristic implements Comparator<Node> {
 								// to the next goal
 								// TODO: do this, now temporarily we put penalty to get the box out of the tunnel
 								tunnelPenalty += tunnel.getTunnelLength()+1 - position;
+
+								int height = Math.abs(n.agentsRow[agentIndex] - coordinate.getX());
+								int width = Math.abs(n.agentsCol[agentIndex] - coordinate.getY());
+								lengthToIllegalBoxInTunnel = width + height;
+								// PENALTY FOR A GOAL IS MORE FAR AWAY THAN POSITION
 								break;
 							} else {
 								// we check if this goal is solved
@@ -317,11 +318,34 @@ public abstract class Heuristic implements Comparator<Node> {
 									boolean goalIsSolved = goal.getAssign() == n.boxMap.get(goalCoordinates).getAssign();
 									if (goalIsSolved) {
 										// everything is good, we can continue and look at the next goal
-										continue;
+										// OK - GOAL IS SOLVED
+										break;
 									} else {
 										// there exist a goal prior to this position or at this position which is not
 										// solved so we give penalty
+
 										tunnelPenalty += tunnel.getTunnelLength()+1 - position;
+
+										int height = Math.abs(n.agentsRow[agentIndex] - coordinate.getX());
+										int width = Math.abs(n.agentsCol[agentIndex] - coordinate.getY());
+										lengthToIllegalBoxInTunnel = width + height;
+										// PENALTY FOR A UNSOLVED GOAL - WRONG BOX IN THE GOAL
+										break;
+									}
+								} else {
+									// box is not in goal and therefore we check if the box is assigned to this goal or not
+									boolean isAssignedToGoal = boxAtAcoordinate.getAssign() == goal.getAssign();
+									if (isAssignedToGoal) {
+										// the box is on the correct way to the goal
+										break;
+									} else {
+										// the box is not assigned to this goal so therefore penalty
+										tunnelPenalty += tunnel.getTunnelLength()+1 - position;
+
+										int height = Math.abs(n.agentsRow[agentIndex] - coordinate.getX());
+										int width = Math.abs(n.agentsCol[agentIndex] - coordinate.getY());
+										lengthToIllegalBoxInTunnel = width + height;
+										// PENALTY FOR A WRONG BOX IN THE TUNNEL
 										break;
 									}
 								}
@@ -332,8 +356,7 @@ public abstract class Heuristic implements Comparator<Node> {
 			}
 		}
 
-
-		int heuristicValue = tunnelPenalty*101 + goalsLeft*100 + (notRightAssigned*50 + assignedDistance) + minLength + noMove;
+		int heuristicValue = tunnelPenalty*10000 + lengthToIllegalBoxInTunnel*1000 + goalsLeft*100 + (notRightAssigned*50 + assignedDistance) + minLength + noMove;
 
 		return heuristicValue;
 	}

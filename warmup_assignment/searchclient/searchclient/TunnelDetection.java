@@ -70,8 +70,6 @@ public class TunnelDetection {
         boolean wallBottom = Node.WALLS.contains(new Coordinate(i + 1, j));
         boolean wallLeft = Node.WALLS.contains(new Coordinate(i,j - 1));
 
-        System.err.println("Finding next coordinate ..");
-
 
         if (!wallTop) {
             Coordinate newCoordinate = new Coordinate(i-1, j);

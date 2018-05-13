@@ -39,7 +39,7 @@ public class Tunnel {
         tunnelCells.put(cellCoordinate, tunnelCells.size() + 1);
 
         if (goal != null) {
-            int position = tunnelCells.size() + 1;
+            int position = tunnelCells.size();
             goalsList.put(goal, position);
             goalsCoordinates.put(position, cellCoordinate);
         }
