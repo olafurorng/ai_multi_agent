@@ -43,10 +43,12 @@ public class ExpendedNodesHelper {
                         n.agentsRow[agentIndex] = newAgentRow;
                         n.agentsCol[agentIndex] = newAgentCol;
 
-                        Heuristic.agentCommunications.removeBox();
-
                         Box currentBox =  n.boxMap.get(new Coordinate(newAgentRow, newAgentCol));
-      
+
+                        if (Heuristic.agentCommunications.getTouchedBox() != null && Heuristic.agentCommunications.getTouchedBox().getCharacter() == currentBox.getCharacter()) {
+                            Heuristic.agentCommunications.removeBox();
+                        }
+                       
                         n.boxMap.remove(new Coordinate(newAgentRow, newAgentCol));
                         Box box = new Box(currentBox.getCharacter(), currentBox.getAssign(), new Coordinate(newBoxRow, newBoxCol));
 
@@ -73,9 +75,12 @@ public class ExpendedNodesHelper {
                         n.agentsRow[agentIndex] = newAgentRow;
                         n.agentsCol[agentIndex] = newAgentCol;
 
-                        Heuristic.agentCommunications.removeBox();
-
                         Box currentBox =  n.boxMap.get(new Coordinate(boxRow, boxCol));
+
+                        if (Heuristic.agentCommunications.getTouchedBox() != null && Heuristic.agentCommunications.getTouchedBox().getCharacter() == currentBox.getCharacter()) {
+                            Heuristic.agentCommunications.removeBox();
+                        }
+
                         n.boxMap.remove(new Coordinate(boxRow, boxCol));
 
                         Box box = new Box(currentBox.getCharacter(), currentBox.getAssign(), new Coordinate(nodeBefore.agentsRow[agentIndex], nodeBefore.agentsCol[agentIndex]));
