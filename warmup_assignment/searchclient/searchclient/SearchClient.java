@@ -130,11 +130,10 @@ public class SearchClient {
 
 			Node leafNode = strategy.getAndRemoveLeaf();
 			//System.err.println(leafNode.toString());
-            if (iterations == 10000) {
+			
+			if (iterations == 10000) {
 				System.err.println(strategy.searchStatus());
 				int counter = 0;
-				//int highest = 0;
-				//Goals highestGoal = null;
 
 				for (Map.Entry<Coordinate, Goals> entry : Node.GOALS.entrySet()) {
 					Goals currentGoal = entry.getValue();
@@ -143,20 +142,12 @@ public class SearchClient {
 
 					Box currentBox = leafNode.boxMap.get(new Coordinate(goalRow, goalCol));
 
-					/*if(highest < currentGoal.getFinished()) {
-						highest = currentGoal.getFinished();
-						highestGoal = currentGoal;
-					}*/
-					// currentGoal.setPriority(1);
 					// If goal is not finished
 					if ((currentBox == null) || (currentBox != null && Character.toLowerCase(currentBox.getCharacter()) != currentGoal.getCharacter())) {
 						counter++;
 					}
-					//System.err.println("current goal: " + currentGoal.getCharacter() + ": " + currentGoal.getFinished());
 
 				}
-				//System.err.println("highestGoal goal: " + highestGoal.getCharacter());
-				//highestGoal.setPriority(100);
 
 				System.err.println("Unfinish goals: " + counter);
 				System.err.println(leafNode.toString());

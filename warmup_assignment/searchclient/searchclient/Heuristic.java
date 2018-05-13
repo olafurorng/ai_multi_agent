@@ -60,8 +60,6 @@ public abstract class Heuristic implements Comparator<Node> {
 		int notRightAssigned = 0;
 		int assignedDistance = 0;
 		int minLength = Integer.MAX_VALUE;
-		//int priority = 0;
-		//int closestBoxPriority = 0;
 
 		if (n.actions[agentIndex].actionType == Type.NoOp) {	
 
@@ -81,19 +79,6 @@ public abstract class Heuristic implements Comparator<Node> {
 		else if ((n.actions[agentIndex].actionType == Type.Move) 
 		|| ((n.actions[agentIndex].actionType == Type.Push || n.actions[agentIndex].actionType == Type.Pull) 
 		&& n.boxMap.get(n.newBox.get(Integer.toString(agentIndex))).getAssign() == 0)) {
-	
-			/*int assignedGoalPriority = 0;
-			for (Map.Entry<Coordinate, Goals> entry : Node.GOALS.entrySet()) {
-				Goals currentGoal = entry.getValue();
-
-				if (!currentGoal.getState()) {
-					currentGoal.setFinished(currentGoal.getFinished() + 1);
-					//priority += currentGoal.getPriority() * 100000;				
-				} 
-				if (currentGoal.getPriority() == 100) {
-					assignedGoalPriority = currentGoal.getAssign();
-				}
-			}*/
 
 			for (Coordinate coordinate : n.boxMap.keySet()) {
 				int row = coordinate.getX();
@@ -129,13 +114,6 @@ public abstract class Heuristic implements Comparator<Node> {
 				if ((currentGoal == null) || (currentGoal != null && currentBox.getAssign() != currentGoal.getAssign())) {
 					notRightAssigned++;
 				}
-
-				/*if (currentBox.getAssign() == assignedGoalPriority ) {
-					minLength = length;	
-					goalsLeft = 1;
-					notRightAssigned = 0;
-					break;
-				}*/
 			}
 			
 			// So moving is almost always worse then pushing and moving a box not in the right goal
@@ -157,7 +135,6 @@ public abstract class Heuristic implements Comparator<Node> {
 				} else {
 					currentGoal.setState(false);	
 					goalsLeft++;	
-					//currentGoal.setFinished(currentGoal.getFinished() + 1);		
 				}	
 
 				// Minimum length to closest goal with the same character
@@ -188,20 +165,6 @@ public abstract class Heuristic implements Comparator<Node> {
 
 					assignedDistance = width + height;
 				}
-
-				/*if (currentGoal.getPriority() == 100) {
-					minLength = length;	
-					goalsLeft = 1;
-					notRightAssigned = 0;
-					assignedDistance = 0;
-					
-					if (currentBox != null && Character.toLowerCase(currentBox.getCharacter()) == currentGoal.getCharacter()) {
-						currentGoal.setPriority(1);
-						goalsLeft = 0;
-						System.err.println("Goal c happens");
-					}
-					break;
-				} */
 			}
 		}
 
