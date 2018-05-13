@@ -83,7 +83,7 @@ public class SearchClient {
 					Color agentColor = ColorHelper.getColorFromString(colorAsString);
 					agentsColor.add(agentColor);
 				} else if ('A' <= chr && chr <= 'Z') { // Box.
-					Box box = new Box(chr, 0);
+					Box box = new Box(chr, 0,coordinate);
 					this.initialState.boxMap.put(coordinate, box);
 				} else if ('a' <= chr && chr <= 'z') { // Goal.
 					Goals goal = new Goals(chr, false, 0);

@@ -43,15 +43,15 @@ public class ExpendedNodesHelper {
                         n.agentsRow[agentIndex] = newAgentRow;
                         n.agentsCol[agentIndex] = newAgentCol;
 
-                        Heuristic.agentCommunications.removeBox(new Coordinate(newAgentRow, newAgentCol));
-                 
+                        Heuristic.agentCommunications.removeBox();
+
                         Box currentBox =  n.boxMap.get(new Coordinate(newAgentRow, newAgentCol));
       
                         n.boxMap.remove(new Coordinate(newAgentRow, newAgentCol));
-                        Box box = new Box(currentBox.getCharacter(), currentBox.getAssign());
+                        Box box = new Box(currentBox.getCharacter(), currentBox.getAssign(), new Coordinate(newBoxRow, newBoxCol));
 
                         n.boxMap.put(new Coordinate(newBoxRow, newBoxCol), box);
-            
+                        
                         n.newBox.put(Integer.toString(agentIndex), new Coordinate(newBoxRow, newBoxCol));
 
                         expandedNodes.add(n);
@@ -73,21 +73,20 @@ public class ExpendedNodesHelper {
                         n.agentsRow[agentIndex] = newAgentRow;
                         n.agentsCol[agentIndex] = newAgentCol;
 
-                        Heuristic.agentCommunications.removeBox(new Coordinate(boxRow, boxCol));
+                        Heuristic.agentCommunications.removeBox();
 
                         Box currentBox =  n.boxMap.get(new Coordinate(boxRow, boxCol));
                         n.boxMap.remove(new Coordinate(boxRow, boxCol));
 
-                        Box box = new Box(currentBox.getCharacter(), currentBox.getAssign());
+                        Box box = new Box(currentBox.getCharacter(), currentBox.getAssign(), new Coordinate(nodeBefore.agentsRow[agentIndex], nodeBefore.agentsCol[agentIndex]));
 
                         n.boxMap.put(new Coordinate(nodeBefore.agentsRow[agentIndex], nodeBefore.agentsCol[agentIndex]), box);
-
                         n.newBox.put(Integer.toString(agentIndex), new Coordinate(nodeBefore.agentsRow[agentIndex], nodeBefore.agentsCol[agentIndex]));
 
                         expandedNodes.add(n);
                     } else if (nodeBefore.boxAt(boxRow, boxCol)) {
                         // just not the same color of the agent and the box
-                        Heuristic.agentCommunications.onBoxWithOtherColorTouched(new Coordinate(newAgentRow, newAgentCol), nodeBefore.boxMap.get(new Coordinate(newAgentRow, newAgentCol)));
+                        Heuristic.agentCommunications.onBoxWithOtherColorTouched(new Coordinate(boxRow, boxCol), nodeBefore.boxMap.get(new Coordinate(boxRow, boxCol)));
                     }
                 }
             }
