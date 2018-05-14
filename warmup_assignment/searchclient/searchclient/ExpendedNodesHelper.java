@@ -16,6 +16,30 @@ public class ExpendedNodesHelper {
 
     public ArrayList<Node> getExpandedNodes(Node parentNode, Node nodeBefore, int agentIndex) {
         ArrayList<Node> expandedNodes = new ArrayList<Node>(Command.EVERY.length);
+
+        // skip expanding nodes if agent has finished all his goals
+        if (Node.NUMBER_OF_AGENTS > 1) {
+            // multi agent
+            boolean missingGoalFound = false;
+            for (Map.Entry<Coordinate, Goals> entry : Node.GOALS.entrySet()) {
+                int goalRow = entry.getKey().getX();
+                int goalCol = entry.getKey().getY();
+                Goals currentGoal = entry.getValue();
+                Box currentBox = nodeBefore.boxMap.get(new Coordinate(goalRow, goalCol));
+
+                if (currentGoal.getColor() == Node.agentsColor[agentIndex]) {
+                    if ((currentBox == null) || (currentBox != null && Character.toLowerCase(currentBox.getCharacter()) != currentGoal.getCharacter())) {
+                        missingGoalFound = true;
+                        break;
+                    }
+                }
+            }
+
+            if (!missingGoalFound) {
+                return expandedNodes;
+            }
+        }
+
         for (Command c : Command.EVERY) {
             // Determine applicability of action
             int newAgentRow = nodeBefore.agentsRow[agentIndex] + Command.dirToRowChange(c.dir1);
