@@ -1,19 +1,19 @@
-blue: 0,A,B
+blue: 0,3,A,B
 red: 1,C,D
 yellow: 2,E
 +++++++++++++++++++++++++++++++++
 + 1 +E          e+aaaaaaaaaaaaaa+
 +   +E          e+              +
 ++ ++E          e+              +
-++B++E          e+              +
-++ ++E          e+AAAAAAAAAAAAAA+
+++ ++E          e+              +
+++B++            +AAAAAAAAAAAAAA+
 +                               +
 +                               +
-+                              0+
++         0                     +
 +                               +
 +                               +
-++ ++            +CCCCCCCCCCCCCC+
-++D++            +              +
+++D++            +CCCCCCCCCCCCCC+
+++ ++            +              +
 ++ ++            +              +
 +   +            +              +
 + 2 +            +cccccccccccccc+

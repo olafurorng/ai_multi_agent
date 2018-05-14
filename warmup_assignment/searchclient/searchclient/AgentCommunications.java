@@ -44,7 +44,7 @@ public class AgentCommunications {
    }
     public void onBoxWithOtherColorTouched(Coordinate coordinate, Box box) {
         this.originalCoordiante = coordinate;
-        this.pullCounter = 5;
+        this.pullCounter = 10;
         touchedBoxesOfOtherColor.put(coordinate, box);
     }
 }

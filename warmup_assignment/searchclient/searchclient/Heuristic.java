@@ -170,13 +170,18 @@ public abstract class Heuristic implements Comparator<Node> {
 							if (currentBox.getCharacter() == agentCommunications.getTouchedBox().getCharacter()) {
 								length += -75;
 							}
-						}
+						} 
 
 						if (length < minLength ) {
 							minLength = length;
 						}		
 
+
 					}
+				}
+
+				if (agentCommunications.getTouchedBox() == null && currentBox.getAssign() == 0) {
+					minLength = 150;
 				}
 
 				// How many boxes are not in the right assigned goal

@@ -75,6 +75,9 @@ public class ExpendedNodesHelper {
                             if (pCounter < 1) {
                                 Heuristic.agentCommunications.removeBox();
                             }
+                            else {
+                                Heuristic.agentCommunications.setPullCounter(pCounter - 1);
+                            }
                         }
                                              
                         n.boxMap.remove(new Coordinate(newAgentRow, newAgentCol));
