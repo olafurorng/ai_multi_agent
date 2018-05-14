@@ -1,0 +1,19 @@
+blue: 0,A,B
+red: 1,C,D
+yellow: 2,E
+
++++++++++++++++++++++++++++++++++++++++
++   +E           +aaaaaaaaaaaaaaaaaaaa+  
++ 1 +E           +                    +
+++ ++E           +                    +
+++B++E           +                    +
+++ ++E           +AAAAAAAAAAAAAAAAAAAA+
++                                     +
++                                    0+
++                                     +
+++ ++           e+CCCCCCCCCCCCCCCCCCCC+  
+++D++           e+                    +
+++ ++           e+                    +
++ 2 +           e+                    +
++   +           e+cccccccccccccccccccc+
++++++++++++++++++++++++++++++++++++++++
