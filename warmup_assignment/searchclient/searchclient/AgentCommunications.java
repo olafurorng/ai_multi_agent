@@ -11,6 +11,7 @@ public class AgentCommunications {
 
     private HashMap<Coordinate, Box> touchedBoxesOfOtherColor = new HashMap<Coordinate, Box>();
     private Coordinate originalCoordiante;
+    private int pullCounter;
 
     public enum Type {
         TOUCHING_BOX_OF_OTHER_COLOR
@@ -25,6 +26,15 @@ public class AgentCommunications {
         return touchedBoxesOfOtherColor.get(originalCoordiante);
     }
 
+    public void setPullCounter(int pullCounter) {
+
+        this.pullCounter = pullCounter;
+    }
+    public int getPullCounter() {
+
+        return pullCounter;
+    }
+
     public void removeBox() {
         touchedBoxesOfOtherColor.remove(originalCoordiante);
     }
@@ -34,6 +44,7 @@ public class AgentCommunications {
    }
     public void onBoxWithOtherColorTouched(Coordinate coordinate, Box box) {
         this.originalCoordiante = coordinate;
+        this.pullCounter = 5;
         touchedBoxesOfOtherColor.put(coordinate, box);
     }
 }

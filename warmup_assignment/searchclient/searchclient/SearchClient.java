@@ -129,8 +129,7 @@ public class SearchClient {
 			}
 
 			Node leafNode = strategy.getAndRemoveLeaf();
-			//System.err.println(leafNode.toString());
-			
+
 			if (iterations == 10000) {
 				System.err.println(strategy.searchStatus());
 				int counter = 0;
@@ -197,7 +196,6 @@ public class SearchClient {
                 		// multi agent
 						strategy = new StrategyBestFirst(new AStarMA(client.initialState));
 					}
-
                     break;
                 case "-wastar":
                     // You're welcome to test WA* out with different values, but for the report you must at least indicate benchmarks for W = 5.
