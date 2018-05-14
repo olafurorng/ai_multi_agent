@@ -83,7 +83,7 @@ public class SearchClient {
 					Color agentColor = ColorHelper.getColorFromString(colorAsString);
 					agentsColor.add(agentColor);
 				} else if ('A' <= chr && chr <= 'Z') { // Box.
-					Box box = new Box(chr, 0);
+					Box box = new Box(chr, 0,coordinate);
 					this.initialState.boxMap.put(coordinate, box);
 				} else if ('a' <= chr && chr <= 'z') { // Goal.
 					Goals goal = new Goals(chr, false, 0);
@@ -129,8 +129,7 @@ public class SearchClient {
 			}
 
 			Node leafNode = strategy.getAndRemoveLeaf();
-			//System.err.println(leafNode.toString());
-			
+
 			if (iterations == 10000) {
 				System.err.println(strategy.searchStatus());
 				int counter = 0;
@@ -197,7 +196,6 @@ public class SearchClient {
                 		// multi agent
 						strategy = new StrategyBestFirst(new AStarMA(client.initialState));
 					}
-
                     break;
                 case "-wastar":
                     // You're welcome to test WA* out with different values, but for the report you must at least indicate benchmarks for W = 5.

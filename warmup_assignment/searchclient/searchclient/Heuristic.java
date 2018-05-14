@@ -119,7 +119,8 @@ public abstract class Heuristic implements Comparator<Node> {
 		int minLength = Integer.MAX_VALUE;
 
 		if (n.actions[agentIndex].actionType == Type.NoOp) {	
-
+			
+			// If there are no more goals for an agent he stops
 			for (Map.Entry<Coordinate, Goals> entry : Node.GOALS.entrySet()) {
 				int goalRow = entry.getKey().getX();
 				int goalCol = entry.getKey().getY();
@@ -132,10 +133,16 @@ public abstract class Heuristic implements Comparator<Node> {
 					}
 				}
 			}
+			// If the agent has a signal he does not want to stay still
+			if (agentCommunications.getTouchedBox() != null && agentCommunications.getTouchedBox().getColor() == Node.agentsColor[agentIndex]) {
+				noMove = 10000000;
+			}
+			
 		}
 		else if ((n.actions[agentIndex].actionType == Type.Move) 
 		|| ((n.actions[agentIndex].actionType == Type.Push || n.actions[agentIndex].actionType == Type.Pull) 
-		&& n.boxMap.get(n.newBox.get(Integer.toString(agentIndex))).getAssign() == 0)) {
+		&& (agentCommunications.getTouchedBox() != null && agentCommunications.getTouchedBox().getColor() != Node.agentsColor[agentIndex]) 
+		&& n.boxMap.get(n.newBox.get(Integer.toString(agentIndex))).getAssign() == 0 )) {
 
 			for (Coordinate coordinate : n.boxMap.keySet()) {
 				int row = coordinate.getX();
@@ -145,36 +152,46 @@ public abstract class Heuristic implements Comparator<Node> {
 
 				// Find closest box that is not in the right goal
 				int length = 0;
-				if ((currentGoal == null && currentBox.getAssign() != 0) || (currentGoal != null && Character.toLowerCase(currentBox.getCharacter()) != currentGoal.getCharacter() &&
-					currentBox.getColor() == Node.agentsColor[agentIndex] && currentBox.getAssign() != 0)) {
-
-					// we calculate the length to the box normally
-					int width = Math.abs(n.agentsCol[agentIndex] - col);
-					int height = Math.abs(n.agentsRow[agentIndex] - row);
-					length = width + height;
-
-
-					if (agentCommunications.getTouchedBox(coordinate) != null && agentCommunications.getTouchedBox(coordinate).getColor() == Node.agentsColor[agentIndex]) {
-						// a box of other color has been touched and we put high priority on going to that box
-						// as that box and agent has the same color instead of e.g. moving other boxes
-						length += -100;
-					}
-
-					if (length < minLength ) {
-						minLength = length;
-					}
-
+				if ((currentGoal == null && currentBox.getAssign() != 0 ) || (currentGoal != null && Character.toLowerCase(currentBox.getCharacter()) != currentGoal.getCharacter())) {
 					goalsLeft++;
 				}
 
+				if (currentBox.getColor() == Node.agentsColor[agentIndex]) {
+					if ((currentGoal == null) || (currentGoal != null && Character.toLowerCase(currentBox.getCharacter()) != currentGoal.getCharacter())) {
+
+						// we calculate the length to the box normally
+						int width = Math.abs(n.agentsCol[agentIndex] - col);
+						int height = Math.abs(n.agentsRow[agentIndex] - row);
+						length = width + height;
+								
+						if (agentCommunications.getTouchedBox() != null && agentCommunications.getTouchedBox().getColor() == Node.agentsColor[agentIndex]) {
+								// a box of other color has been touched and we put high priority on going to that box
+								// as that box and agent has the same color instead of e.g. moving other boxes
+							if (currentBox.getCharacter() == agentCommunications.getTouchedBox().getCharacter()) {
+								length += -75;
+							}
+						}
+
+						if (length < minLength ) {
+							minLength = length;
+						}		
+
+					}
+				}
+
 				// How many boxes are not in the right assigned goal
-				if ((currentGoal == null) || (currentGoal != null && currentBox.getAssign() != currentGoal.getAssign())) {
+				if ((currentGoal == null && currentBox.getAssign() != 0) || (currentGoal != null && currentBox.getAssign() != currentGoal.getAssign())) {
 					notRightAssigned++;
 				}
 			}
 			
 			// So moving is almost always worse then pushing and moving a box not in the right goal
-			minLength += 75;
+			if (minLength == Integer.MAX_VALUE) {
+				minLength = 20;
+			}
+			else {			
+				minLength += 75;
+			}
 		}
 		else if (n.actions[agentIndex].actionType == Type.Push || n.actions[agentIndex].actionType == Type.Pull) {
 
@@ -196,15 +213,32 @@ public abstract class Heuristic implements Comparator<Node> {
 
 				// Minimum length to closest goal with the same character
 				int length = 0;
-				if (!currentGoal.getState() && Character.toLowerCase(currentBoxMoving.getCharacter()) == currentGoal.getCharacter()) {
-					int width = Math.abs(n.agentsCol[agentIndex] - goalCol);
-					int height = Math.abs(n.agentsRow[agentIndex] - goalRow);
+				
+				// When there is signal for a agent, he wants to pull the box
+				if (agentCommunications.getTouchedBox() != null && agentCommunications.getTouchedBox().getColor() == Node.agentsColor[agentIndex] &&
+				currentBoxMoving.getCharacter() == agentCommunications.getTouchedBox().getCharacter()) {										
+					minLength = 2;		
 
-					length = width + height;
+					// It is better to pull a signal
+					if (n.actions[agentIndex].actionType == Type.Pull) {
+						minLength = -5;
+					}						
+				}
+				else if (!currentGoal.getState()) {
+					// Finds length to next goal
+					if (Character.toLowerCase(currentBoxMoving.getCharacter()) == currentGoal.getCharacter()) {		
+						int width = Math.abs(n.agentsCol[agentIndex] - goalCol);
+						int height = Math.abs(n.agentsRow[agentIndex] - goalRow);
 
-					if (length < minLength) {
-						minLength = length;
-					}					
+						length = width + height;
+				
+						if (length < minLength) {
+							minLength = length;
+						}	
+					}	
+					if (currentBoxMoving.getAssign() == 0) {
+						minLength = 500;
+					}		
 				}
 
 				// How many boxes are not in the right assigned goal
@@ -335,8 +369,6 @@ public abstract class Heuristic implements Comparator<Node> {
 		public AStarSA(Node initialState) {
 			super(initialState);
 		}
-
-
 
 		@Override
 		public int f(Node n) {

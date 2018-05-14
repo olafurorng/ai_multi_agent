@@ -6,10 +6,13 @@ public class Box {
     private char character;
     private int assign;
     private final ColorHelper.Color color;
+    private Coordinate coordinate;
 
-    public Box(char character, int assign) {
+    public Box(char character, int assign, Coordinate coordinate) {
         this.character = character;
         this.assign = assign;
+        this.coordinate = coordinate;
+        
         String colorAsString = SearchClient.colorsMap.get(character);
         if (colorAsString != null) {
             color = ColorHelper.getColorFromString(colorAsString);
@@ -24,6 +27,14 @@ public class Box {
 
     public void setCharacter(char character) {
         this.character = character;
+    }
+
+    public Coordinate getCoordinate() {
+        return coordinate;
+    }
+
+    public void setCoordinate(Coordinate coordinate) {
+        this.coordinate = coordinate;
     }
 
     public int getAssign() {
