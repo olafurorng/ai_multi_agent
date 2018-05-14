@@ -17,7 +17,7 @@ public class ExpendedNodesHelper {
     public ArrayList<Node> getExpandedNodes(Node parentNode, Node nodeBefore, int agentIndex) {
         ArrayList<Node> expandedNodes = new ArrayList<Node>(Command.EVERY.length);
 
-        // skip expanding nodes if agent has finished all his goals
+        // skip expanding nodes if agent has finished all his goals and there is no signal
         if (Node.NUMBER_OF_AGENTS > 1) {
             // multi agent
             boolean missingGoalFound = false;
@@ -35,7 +35,7 @@ public class ExpendedNodesHelper {
                 }
             }
 
-            if (!missingGoalFound) {
+            if (!missingGoalFound && (Heuristic.agentCommunications.getTouchedBox() == null || Heuristic.agentCommunications.getTouchedBox().getColor() != Node.agentsColor[agentIndex])) {
                 return expandedNodes;
             }
         }
