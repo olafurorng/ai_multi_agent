@@ -89,7 +89,8 @@ public class ExpendedNodesHelper {
                 } else if (nodeBefore.boxAt(newAgentRow, newAgentCol)) {
                     // just not the same color of the agent and the box
  
-                    if(Heuristic.agentCommunications.getTouchedBox() == null) { 
+                    if(Heuristic.agentCommunications.getTouchedBox() == null || 
+                    (Heuristic.agentCommunications.getTouchedBox() != null && Heuristic.agentCommunications.getTouchedBox().getColor() == Node.agentsColor[agentIndex])) {
                         Heuristic.agentCommunications.onBoxWithOtherColorTouched(new Coordinate(newAgentRow, newAgentCol), nodeBefore.boxMap.get(new Coordinate(newAgentRow, newAgentCol)));                
                     }
 
@@ -129,7 +130,8 @@ public class ExpendedNodesHelper {
                         expandedNodes.add(n);
                     } else if (nodeBefore.boxAt(boxRow, boxCol)) {
                         // just not the same color of the agent and the box
-                        if(Heuristic.agentCommunications.getTouchedBox() == null) { 
+                        if(Heuristic.agentCommunications.getTouchedBox() == null || 
+                        (Heuristic.agentCommunications.getTouchedBox() != null && Heuristic.agentCommunications.getTouchedBox().getColor() == Node.agentsColor[agentIndex]) ) { 
                             Heuristic.agentCommunications.onBoxWithOtherColorTouched(new Coordinate(boxRow, boxCol), nodeBefore.boxMap.get(new Coordinate(boxRow, boxCol)));                     
                         }
                       

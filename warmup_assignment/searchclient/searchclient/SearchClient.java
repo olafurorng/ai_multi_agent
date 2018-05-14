@@ -149,7 +149,9 @@ public class SearchClient {
 				}
 
 				System.err.println("Unfinish goals: " + counter);
+				System.err.println("Signal: " + Heuristic.agentCommunications.getTouchedBox().getColor());
 				System.err.println(leafNode.toString());
+
 				iterations = 0;
 			}
 

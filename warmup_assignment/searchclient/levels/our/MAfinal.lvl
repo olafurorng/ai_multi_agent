@@ -1,19 +1,20 @@
 blue: 0,A,B
 red: 1,C,D
 yellow: 2,E
-
-+++++++++++++++++++++++++++++++++++++++
-+   +E           +aaaaaaaaaaaaaaaaaaaa+  
-+ 1 +E           +                    +
-++ ++E           +                    +
-++B++E           +                    +
-++ ++E           +AAAAAAAAAAAAAAAAAAAA+
-+                                     +
-+                                    0+
-+                                     +
-++ ++           e+CCCCCCCCCCCCCCCCCCCC+  
-++D++           e+                    +
-++ ++           e+                    +
-+ 2 +           e+                    +
-+   +           e+cccccccccccccccccccc+
-+++++++++++++++++++++++++++++++++++++++
++++++++++++++++++++++++++++++++++
++ 1 +E          e+aaaaaaaaaaaaaa+
++   +E          e+              +
+++ ++E          e+              +
+++B++E          e+              +
+++ ++E          e+AAAAAAAAAAAAAA+
++                               +
++                               +
++                              0+
++                               +
++                               +
+++ ++            +CCCCCCCCCCCCCC+
+++D++            +              +
+++ ++            +              +
++   +            +              +
++ 2 +            +cccccccccccccc+
++++++++++++++++++++++++++++++++++
