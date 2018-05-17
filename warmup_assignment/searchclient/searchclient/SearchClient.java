@@ -23,6 +23,7 @@ public class SearchClient {
             String color = colorParts[0];
             String[] agentsAndBoxes = colorParts[1].trim().split("\\,");
             for(String agentOrBox : agentsAndBoxes){
+				agentOrBox = agentOrBox.replace(" ", "");
                 colorsMap.put(agentOrBox.charAt(0), color);
             }
 
