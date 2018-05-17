@@ -107,6 +107,7 @@ public abstract class Heuristic implements Comparator<Node> {
 
 						if (goalIsInTunnel && tunnel.getTunnelLength() > 3) {
 							Node.TUNNELS.add(tunnel);
+							System.err.println(tunnel.getTunnelLength());
 						}
 					}
                 }
@@ -289,6 +290,7 @@ public abstract class Heuristic implements Comparator<Node> {
 		// CALCULATE TUNNEL PENALTY
 		int tunnelPenalty = 0;
 		int lengthToIllegalBoxInTunnel = 0;
+		int tunnelPlus = 0;
 
 		for (Tunnel tunnel : Node.TUNNELS) {
 			for (Map.Entry<Coordinate, Integer> entry : tunnel.getTunnelCells().entrySet()) {
@@ -320,12 +322,13 @@ public abstract class Heuristic implements Comparator<Node> {
 							
 							boolean skipBox = coordinate != goalCoordinates;
 							if (goalIsSolved && skipBox) {
+								tunnelPlus += -tunnel.getTunnelLength() * 50;
 								continue;
 							}
 							if (goalIsSolved && innermostEmptyGoal) {					
 								// everything is good, we can continue and look at the next goal
 								// OK - GOAL IS SOLVED
-	
+								tunnelPlus += -tunnel.getTunnelLength() * 50;
 								break;					
 							} else {
 								// there exist a goal prior to this position or at this position which is not
@@ -354,14 +357,18 @@ public abstract class Heuristic implements Comparator<Node> {
 						} else if (positionOfGoal < positionOfBox) {
 		
 							// box is not in goal and therefore we check if the box is assigned to this goal or not
-							boolean isAssignedToGoal = boxAtAcoordinate.getAssign() == goal.getAssign();
+							boolean isAssignedToGoal = Character.toLowerCase(boxAtAcoordinate.getCharacter()) == goal.getCharacter();
+
 							//boolean skipBox = coordinate != goalCoordinates;
 
 							if (isAssignedToGoal && innermostEmptyGoal ) {	
 								//System.err.println("happens");
 								//tunnelPlus = Math.abs(positionOfGoal - positionOfBox);
 								// the box is on the correct way to the goal
+								tunnelPlus += -(tunnel.getTunnelLength() - (positionOfBox - positionOfGoal)) * 50;
+								//System.err.println(tunnelPlus);
 								break;
+	
 							} else {
 								// the box is not assigned to this goal so therefore penalty
 								tunnelPenalty += tunnel.getTunnelLength() - positionOfBox;
@@ -392,7 +399,7 @@ public abstract class Heuristic implements Comparator<Node> {
 			}
 		}
 
-		int heuristicValue = tunnelPenalty*10000 + lengthToIllegalBoxInTunnel*1000 + goalsLeft*100 + (notRightAssigned*50 + assignedDistance) + minLength + noMove;
+		int heuristicValue = tunnelPlus + tunnelPenalty*10000 + lengthToIllegalBoxInTunnel*1000 + goalsLeft*100 + (notRightAssigned*50 + assignedDistance) + minLength + noMove;
 
 		return heuristicValue;
 	}
