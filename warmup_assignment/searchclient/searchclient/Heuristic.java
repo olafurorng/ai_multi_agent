@@ -289,7 +289,6 @@ public abstract class Heuristic implements Comparator<Node> {
 		// CALCULATE TUNNEL PENALTY
 		int tunnelPenalty = 0;
 		int lengthToIllegalBoxInTunnel = 0;
-		int tunnelPlus = 0;
 
 		for (Tunnel tunnel : Node.TUNNELS) {
 			for (Map.Entry<Coordinate, Integer> entry : tunnel.getTunnelCells().entrySet()) {
@@ -393,7 +392,7 @@ public abstract class Heuristic implements Comparator<Node> {
 			}
 		}
 
-		int heuristicValue = tunnelPlus*10 + tunnelPenalty*10000 + lengthToIllegalBoxInTunnel*1000 + goalsLeft*100 + (notRightAssigned*50 + assignedDistance) + minLength + noMove;
+		int heuristicValue = tunnelPenalty*10000 + lengthToIllegalBoxInTunnel*1000 + goalsLeft*100 + (notRightAssigned*50 + assignedDistance) + minLength + noMove;
 
 		return heuristicValue;
 	}
