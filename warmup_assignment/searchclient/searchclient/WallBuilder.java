@@ -159,10 +159,13 @@ public class WallBuilder {
 
             iterations++;
         }
-        System.err.println("----------------------------------------");
-        System.err.println("Adding walls as possible is done, iterations: " + iterations);
-        System.err.println(state.toString());
-        System.err.println("----------------------------------------");
+        if (SearchClient.IS_DEV_VERSION) {
+            System.err.println("----------------------------------------");
+            System.err.println("Adding walls as possible is done, iterations: " + iterations);
+            System.err.println(state.toString());
+            System.err.println("----------------------------------------");
+        }
+
     }
 
 
@@ -200,9 +203,12 @@ public class WallBuilder {
      *   +++++++++++++++++
      */
     public static void buildWallInEmptyCellWith3TouchingWallAnd1TouchingGoal(Node state) {
-        System.err.println("----------------------------------------");
-        System.err.println("Walls before adding wall in empty surrounded cells");
-        System.err.println(state.toString());
+        if (SearchClient.IS_DEV_VERSION) {
+            System.err.println("----------------------------------------");
+            System.err.println("Walls before adding wall in empty surrounded cells");
+            System.err.println(state.toString());
+        }
+
 
         // we will start adding walls in free cells which are outside the level
         // lets start with adding from the left side
@@ -281,10 +287,12 @@ public class WallBuilder {
             iterations++;
         }
 
+        if (SearchClient.IS_DEV_VERSION) {
+            System.err.println("----------------------------------------");
+            System.err.println("Adding walls as possible is done, iterations: " + iterations);
+            System.err.println(state.toString());
+            System.err.println("----------------------------------------");
+        }
 
-        System.err.println("----------------------------------------");
-        System.err.println("Adding walls as possible is done, iterations: " + iterations);
-        System.err.println(state.toString());
-        System.err.println("----------------------------------------");
     }
 }
