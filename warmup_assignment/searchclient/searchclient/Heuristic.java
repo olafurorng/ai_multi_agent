@@ -27,18 +27,21 @@ public abstract class Heuristic implements Comparator<Node> {
 				int boxRow = boxKey.getX();
 				int boxCol = boxKey.getY();
 				Box currentBox = initialState.boxMap.get(new Coordinate(boxRow, boxCol));
+				
+				if (currentBox.getAssign() == 0) {
+					if (Character.toLowerCase(currentBox.getCharacter()) == currentGoal.getCharacter()) {
+						int width = Math.abs(goalCol - boxCol);
+						int height = Math.abs(goalRow - boxRow);
 		
-				if (Character.toLowerCase(currentBox.getCharacter()) == currentGoal.getCharacter()) {
-					int width = Math.abs(goalCol - boxCol);
-					int height = Math.abs(goalRow - boxRow);
-	
-					int length = width + height;
-	
-					if (length < minLength)  {
-						minLength = length;
-						minBox = currentBox;
+						int length = width + height;
+		
+						if (length < minLength)  {
+							minLength = length;
+							minBox = currentBox;
+						}	
 					}	
-				}			
+				}
+		
 			}
 
 			currentGoal.setAssign(counter);
@@ -141,7 +144,7 @@ public abstract class Heuristic implements Comparator<Node> {
 		}
 		else if ((n.actions[agentIndex].actionType == Type.Move) 
 		|| ((n.actions[agentIndex].actionType == Type.Push || n.actions[agentIndex].actionType == Type.Pull) 
-		&& (agentCommunications.getTouchedBox() != null && agentCommunications.getTouchedBox().getColor() != Node.agentsColor[agentIndex]) 
+		&& (agentCommunications.getTouchedBox() == null || (agentCommunications.getTouchedBox() != null && agentCommunications.getTouchedBox().getColor() != Node.agentsColor[agentIndex])) 
 		&& n.boxMap.get(n.newBox.get(Integer.toString(agentIndex))).getAssign() == 0 )) {
 
 			for (Coordinate coordinate : n.boxMap.keySet()) {
@@ -175,7 +178,6 @@ public abstract class Heuristic implements Comparator<Node> {
 						if (length < minLength ) {
 							minLength = length;
 						}		
-
 
 					}
 				}
