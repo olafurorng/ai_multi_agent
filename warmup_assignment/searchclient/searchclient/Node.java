@@ -31,6 +31,8 @@ public class Node {
 	public int[] agentsRow = new int[NUMBER_OF_AGENTS];
 	public int[] agentsCol = new int[NUMBER_OF_AGENTS];
 	public static Color[] agentsColor;
+	public static int[] minRowAgents;
+	public static int[] maxRowAgents;
 
 
 	public static List<Tunnel> TUNNELS = new ArrayList<Tunnel>();
@@ -90,19 +92,51 @@ public class Node {
 		return true;
 	}
 
-	public ArrayList<Node> getExpandedNodes() {
-		ArrayList<Node> allExpendedNodes = new ArrayList<Node>();
-		allExpendedNodes.addAll(EXPENDED_NODES_HELPER.getExpandedNodes(this, this, 0));
+	public boolean hasAgentFinishedHisBoxes(int agentIndex) {
+		for (Map.Entry<Coordinate, Goals> entry : Node.GOALS.entrySet()) {
+			int goalRow = entry.getKey().getX();
+			int goalCol = entry.getKey().getY();
+			Goals currentGoal = entry.getValue();
+			Box currentBox = this.boxMap.get(new Coordinate(goalRow, goalCol));
 
-		for (int i = 1; i < NUMBER_OF_AGENTS; i++) { // we start from one as we have already expanded nodes for the first agent
-			if (NUMBER_OF_AGENTS >= i+1) {
-				ArrayList<Node> tempNewNodes = new ArrayList<Node>();
-				for (Node n : allExpendedNodes) {
-					tempNewNodes.addAll(EXPENDED_NODES_HELPER.getExpandedNodes(this, n, i));
+			if (currentGoal.getColor() == Node.agentsColor[agentIndex]) {
+				if ((currentBox == null) || (currentBox != null && Character.toLowerCase(currentBox.getCharacter()) != currentGoal.getCharacter())) {
+					if ((Node.minRowAgents[agentIndex] <= goalRow && goalRow <= Node.maxRowAgents[agentIndex])) {
+						// box row is reachable by the agent
+					  return false;
+					}
 				}
-				allExpendedNodes.addAll(tempNewNodes);
-				allExpendedNodes.addAll(EXPENDED_NODES_HELPER.getExpandedNodes(this, this, i));
 			}
+		}
+
+		return true;
+	}
+
+	public ArrayList<Node> getExpandedNodes(boolean oneAgentMovingEveryTime) {
+		ArrayList<Node> allExpendedNodes = new ArrayList<Node>();
+		if (oneAgentMovingEveryTime) {
+			for (int i = 0; i < NUMBER_OF_AGENTS; i++) {
+				boolean agentIsDone = hasAgentFinishedHisBoxes(i);
+				if (!agentIsDone) {
+					allExpendedNodes.addAll(EXPENDED_NODES_HELPER.getExpandedNodes(this, this, i));
+					break;
+				}
+			}
+		} else {
+			allExpendedNodes.addAll(EXPENDED_NODES_HELPER.getExpandedNodes(this, this, 0));
+
+			for (int i = 1; i < NUMBER_OF_AGENTS; i++) { // we start from one as we have already expanded nodes for the first agent
+				if (NUMBER_OF_AGENTS >= i+1) {
+					ArrayList<Node> tempNewNodes = new ArrayList<Node>();
+					for (Node n : allExpendedNodes) {
+						tempNewNodes.addAll(EXPENDED_NODES_HELPER.getExpandedNodes(this, n, i));
+					}
+					allExpendedNodes.addAll(tempNewNodes);
+					allExpendedNodes.addAll(EXPENDED_NODES_HELPER.getExpandedNodes(this, this, i));
+				}
+			}
+
+
 		}
 
 		Collections.shuffle(allExpendedNodes, RND);
