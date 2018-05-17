@@ -50,7 +50,7 @@ public class Tunnel {
     }
 
     public int getTunnelLength() {
-        return tunnelCells.size();
+        return tunnelCells.size() + 1;
     }
 
 

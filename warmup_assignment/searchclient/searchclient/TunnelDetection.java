@@ -40,6 +40,7 @@ public class TunnelDetection {
 
 
         if (numberOfWallsTouching == 3) {
+            System.err.println(coordinate.getX() + "," + coordinate.getY());
             throw new IllegalStateException("The tunnel can't be closed in both ends");
         }
         if (numberOfWallsTouching == 4) {
