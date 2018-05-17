@@ -16,6 +16,8 @@ public class SearchClient {
 
 	boolean oneAgentMovingEveryTime = false;
 
+	public static List<Integer> horizontalLineNumberWithWallSplit= new ArrayList<Integer>();
+
 	public SearchClient(BufferedReader serverMessages) throws Exception {
 		// Read lines specifying colors
 		String line = serverMessages.readLine();
@@ -69,9 +71,14 @@ public class SearchClient {
 		List<Color> agentsColor = new ArrayList<Color>();
 
 		for (String serverMessageLine: lines) {
+			boolean hasHorizontalWall = true;
 			for (int col = 0; col < serverMessageLine.length(); col++) {
 				char chr = serverMessageLine.charAt(col);
 				Coordinate coordinate = new Coordinate(row, col);
+
+				if (chr != '+') {
+					hasHorizontalWall = false;
+				}
 
 				if (chr == '+') { // Wall.
 					Node.WALLS.add(coordinate);
@@ -99,6 +106,10 @@ public class SearchClient {
 				}
 			}
 
+			if (hasHorizontalWall) {
+				horizontalLineNumberWithWallSplit.add(row);
+			}
+
 			row++;
 		}
 
@@ -122,6 +133,32 @@ public class SearchClient {
 		// DECIDE IF WE ARE GOING TO HAVE ONE OR MANY AGENTS MOVING ON THE SAME TIME
 		if (Node.NUMBER_OF_AGENTS >= 8) {
 			oneAgentMovingEveryTime = true;
+		}
+
+		// lets find what is the maximum and minimum row for each agent
+		Node.minRowAgents = new int[Node.NUMBER_OF_AGENTS];
+		Node.maxRowAgents = new int[Node.NUMBER_OF_AGENTS];
+
+		for (int i = 0; i < Node.NUMBER_OF_AGENTS; i++) {
+			int agentAtRow = initialState.agentsRow[i];
+
+			int minRowForAgent = 0;
+			int maxRowForAgent = Integer.MAX_VALUE;
+			for (Integer wallSplit: SearchClient.horizontalLineNumberWithWallSplit) {
+				if (wallSplit < agentAtRow) {
+					if (wallSplit > minRowForAgent) {
+						minRowForAgent = wallSplit;
+					}
+				}
+				if (wallSplit > agentAtRow) {
+					if (wallSplit < maxRowForAgent) {
+						maxRowForAgent = wallSplit;
+					}
+				}
+			}
+
+			Node.minRowAgents[i] = minRowForAgent;
+			Node.maxRowAgents[i] = maxRowForAgent;
 		}
 	}
 

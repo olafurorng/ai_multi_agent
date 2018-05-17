@@ -27,19 +27,19 @@ public abstract class Heuristic implements Comparator<Node> {
 				int boxRow = boxKey.getX();
 				int boxCol = boxKey.getY();
 				Box currentBox = initialState.boxMap.get(new Coordinate(boxRow, boxCol));
-				
+
 				if (currentBox.getAssign() == 0) {
 					if (Character.toLowerCase(currentBox.getCharacter()) == currentGoal.getCharacter()) {
 						int width = Math.abs(goalCol - boxCol);
 						int height = Math.abs(goalRow - boxRow);
-		
+
 						int length = width + height;
-		
+
 						if (length < minLength)  {
 							minLength = length;
 							minBox = currentBox;
-						}	
-					}	
+						}
+					}
 				}
 		
 			}
@@ -161,6 +161,14 @@ public abstract class Heuristic implements Comparator<Node> {
 
 				if (currentBox.getColor() == Node.agentsColor[agentIndex]) {
 					if ((currentGoal == null) || (currentGoal != null && Character.toLowerCase(currentBox.getCharacter()) != currentGoal.getCharacter())) {
+
+
+						// first we check if the the row is reachable by the agent
+						// lets check if the box row and agent row is in the same horizontal section
+						if (!(Node.minRowAgents[agentIndex] <= row && row <= Node.maxRowAgents[agentIndex])) {
+							// box row is not reachable by the agent
+							continue;
+						}
 
 						// we calculate the length to the box normally
 						int width = Math.abs(n.agentsCol[agentIndex] - col);

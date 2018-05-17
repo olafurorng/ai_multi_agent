@@ -31,6 +31,8 @@ public class Node {
 	public int[] agentsRow = new int[NUMBER_OF_AGENTS];
 	public int[] agentsCol = new int[NUMBER_OF_AGENTS];
 	public static Color[] agentsColor;
+	public static int[] minRowAgents;
+	public static int[] maxRowAgents;
 
 
 	public static List<Tunnel> TUNNELS = new ArrayList<Tunnel>();
@@ -99,8 +101,10 @@ public class Node {
 
 			if (currentGoal.getColor() == Node.agentsColor[agentIndex]) {
 				if ((currentBox == null) || (currentBox != null && Character.toLowerCase(currentBox.getCharacter()) != currentGoal.getCharacter())) {
-					return false;
-
+					if ((Node.minRowAgents[agentIndex] <= goalRow && goalRow <= Node.maxRowAgents[agentIndex])) {
+						// box row is reachable by the agent
+					  return false;
+					}
 				}
 			}
 		}
