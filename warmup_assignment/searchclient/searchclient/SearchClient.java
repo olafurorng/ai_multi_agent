@@ -10,6 +10,9 @@ import searchclient.Heuristic.*;
 import searchclient.ColorHelper.*;
 
 public class SearchClient {
+	public static final boolean IS_DEV_VERSION = false;
+
+
 	public Node initialState;
 
 	public static HashMap<Character, String> colorsMap;
@@ -176,29 +179,31 @@ public class SearchClient {
 
 			Node leafNode = strategy.getAndRemoveLeaf();
 
-			if (iterations == 10000) {
-				System.err.println(strategy.searchStatus());
-				int counter = 0;
+			if (IS_DEV_VERSION) {
+				if (iterations == 10000) {
+					System.err.println(strategy.searchStatus());
+					int counter = 0;
 
-				for (Map.Entry<Coordinate, Goals> entry : Node.GOALS.entrySet()) {
-					Goals currentGoal = entry.getValue();
-					int goalRow = entry.getKey().getX();
-					int goalCol = entry.getKey().getY();
+					for (Map.Entry<Coordinate, Goals> entry : Node.GOALS.entrySet()) {
+						Goals currentGoal = entry.getValue();
+						int goalRow = entry.getKey().getX();
+						int goalCol = entry.getKey().getY();
 
-					Box currentBox = leafNode.boxMap.get(new Coordinate(goalRow, goalCol));
+						Box currentBox = leafNode.boxMap.get(new Coordinate(goalRow, goalCol));
 
-					// If goal is not finished
-					if ((currentBox == null) || (currentBox != null && Character.toLowerCase(currentBox.getCharacter()) != currentGoal.getCharacter())) {
-						counter++;
+						// If goal is not finished
+						if ((currentBox == null) || (currentBox != null && Character.toLowerCase(currentBox.getCharacter()) != currentGoal.getCharacter())) {
+							counter++;
+						}
+
 					}
 
+					System.err.println("Unfinish goals: " + counter);
+					//System.err.println("Signal: " + Heuristic.agentCommunications.getTouchedBox().getColor());
+					System.err.println(leafNode.toString());
+
+					iterations = 0;
 				}
-
-				System.err.println("Unfinish goals: " + counter);
-				//System.err.println("Signal: " + Heuristic.agentCommunications.getTouchedBox().getColor());
-				System.err.println(leafNode.toString());
-
-				iterations = 0;
 			}
 
 			if (leafNode.isGoalState()) {
@@ -261,9 +266,12 @@ public class SearchClient {
             System.err.println("Defaulting to BFS search. Use arguments -bfs, -dfs, -astar, -wastar, or -greedy to set the search strategy.");
         }
 
-        for (Tunnel tunnel : Node.TUNNELS) {
-        	System.err.println("Tunnel: " + tunnel);
+		if (SearchClient.IS_DEV_VERSION) {
+			for (Tunnel tunnel : Node.TUNNELS) {
+				System.err.println("Tunnel: " + tunnel);
+			}
 		}
+
 
 		LinkedList<Node> solution;
 		try {
