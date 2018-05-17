@@ -14,6 +14,8 @@ public class SearchClient {
 
 	public static HashMap<Character, String> colorsMap;
 
+	boolean oneAgentMovingEveryTime = false;
+
 	public SearchClient(BufferedReader serverMessages) throws Exception {
 		// Read lines specifying colors
 		String line = serverMessages.readLine();
@@ -115,6 +117,12 @@ public class SearchClient {
 		// Lets relax the problem by adding edges / walls
 		//WallBuilder.buildWallsSafely(this.initialState);
 		WallBuilder.buildWallInEmptyCellWith3TouchingWallAnd1TouchingGoal(this.initialState);
+
+
+		// DECIDE IF WE ARE GOING TO HAVE ONE OR MANY AGENTS MOVING ON THE SAME TIME
+		if (Node.NUMBER_OF_AGENTS >= 8) {
+			oneAgentMovingEveryTime = true;
+		}
 	}
 
 
@@ -161,7 +169,7 @@ public class SearchClient {
 			}
 
 			strategy.addToExplored(leafNode);
-			for (Node n : leafNode.getExpandedNodes()) { // The list of expanded nodes is shuffled randomly; see Node.java.
+			for (Node n : leafNode.getExpandedNodes(oneAgentMovingEveryTime)) { // The list of expanded nodes is shuffled randomly; see Node.java.
 				
 				if (!strategy.isExplored(n) && !strategy.inFrontier(n)) {
 					strategy.addToFrontier(n);
@@ -230,7 +238,7 @@ public class SearchClient {
 
 		if (solution == null) {
 			System.err.println(strategy.searchStatus());
-			System.err.println("Unable to solve level.");
+			System.err.println("Unable to solve level - No solution.");
 			System.exit(0);
 		} else {
 			System.err.println("\nSummary for " + strategy.toString());
