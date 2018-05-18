@@ -10,7 +10,7 @@ import searchclient.Heuristic.*;
 import searchclient.ColorHelper.*;
 
 public class SearchClient {
-	public static final boolean IS_DEV_VERSION = false;
+	public static final boolean IS_DEV_VERSION = true;
 
 
 	public Node initialState;

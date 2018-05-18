@@ -64,10 +64,6 @@ public abstract class Heuristic implements Comparator<Node> {
 
 					if (isInEndOfTunnel) {
 
-						if (Node.GOALS.get(coordinate) != null) {
-							goalIsInTunnel = true;
-						}
-
 						// Create the tunnel and add the first cell to the tunnel object
 						Tunnel tunnel = new Tunnel();
 						tunnel.addCellToTunnel(coordinate, Node.GOALS.get(coordinate));
@@ -78,11 +74,7 @@ public abstract class Heuristic implements Comparator<Node> {
 						while (isStillInTunnel) {
 							// find the next coordinate in the tunnel
 							Coordinate nextCoordinate = TunnelDetection.findNextCoordinateInTunnel(thisCoordinate, lastCoordinate);
-							
-							if (Node.GOALS.get(nextCoordinate) != null) {
-								goalIsInTunnel = true;
-							}
-
+						
 							/*NULLABLE*/
 							Goals goalAtNextCoordinate = Node.GOALS.get(nextCoordinate);
 
@@ -104,10 +96,9 @@ public abstract class Heuristic implements Comparator<Node> {
 								tunnel.onTunnelEndDetected();
 							}
 						}
-
-						if (goalIsInTunnel && tunnel.getTunnelLength() > 3) {
+					
+						if (tunnel.getTunnelLength() > 3 && tunnel.getGoalsList().size() > 1) {
 							Node.TUNNELS.add(tunnel);
-							System.err.println(tunnel.getTunnelLength());
 						}
 					}
                 }
@@ -293,6 +284,8 @@ public abstract class Heuristic implements Comparator<Node> {
 		int tunnelPlus = 0;
 
 		for (Tunnel tunnel : Node.TUNNELS) {
+			int boxCounter = 0;
+
 			for (Map.Entry<Coordinate, Integer> entry : tunnel.getTunnelCells().entrySet()) {
 				Coordinate coordinate = entry.getKey();
 				int positionOfBox = entry.getValue();
@@ -300,6 +293,7 @@ public abstract class Heuristic implements Comparator<Node> {
 
 				// if there is box at this coordinate we check if it is allowed
 				if (boxAtAcoordinate != null) {
+					boxCounter++;
 					// we loop through the goals in the tunnel from the deepest goal
 					// 1. we check if the previous goal until this position, has been solved, if
 					//    we detect an unsolved goal, we check if the box is assigned to that goal
@@ -329,6 +323,7 @@ public abstract class Heuristic implements Comparator<Node> {
 								// everything is good, we can continue and look at the next goal
 								// OK - GOAL IS SOLVED
 								tunnelPlus += -tunnel.getTunnelLength() * 50;
+								//System.err.println(tunnelPlus);
 								break;					
 							} else {
 								// there exist a goal prior to this position or at this position which is not
@@ -394,8 +389,12 @@ public abstract class Heuristic implements Comparator<Node> {
 								innermostEmptyGoal = false;
 							}		
 						}
-					}					
+					}				
 				}
+			}
+
+			if (boxCounter > tunnel.getGoalsList().size() ) {
+				tunnelPlus = 0;
 			}
 		}
 
